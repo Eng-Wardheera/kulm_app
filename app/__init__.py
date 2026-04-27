@@ -1,22 +1,16 @@
 from datetime import datetime
 
 import os
-import textwrap
 import traceback
-from bson import ObjectId
-from flask import Flask, flash, jsonify, redirect, render_template, url_for
+from flask import Flask, flash, redirect, render_template, url_for
 from flask_cors import CORS
 from flask_mail import Mail
 from flask_migrate import Migrate
-from bson.errors import InvalidId
 from flask_pymongo import PyMongo
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from authlib.integrations.flask_client import OAuth
-from flask_wtf import CSRFProtect
 import pytz
 from dotenv import load_dotenv
-import urllib
 
 
 

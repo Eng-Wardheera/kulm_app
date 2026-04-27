@@ -1,5 +1,4 @@
 # device_agent.py
-import socket
 import uuid
 import psutil
 import platform

@@ -1,61 +1,15 @@
-import base64
-from collections import defaultdict
-import csv
-from decimal import Decimal
-from email import parser
-import io
-import platform
-import socket
-import string
-import sys
-import traceback
-from xml.dom.minidom import Document
-import bcrypt
-from bson import ObjectId
-from flask_wtf import FlaskForm
-from googletrans import Translator
-import imgkit
-from pandas import read_csv 
-import pandas as pd
-from flask_mail import Message
-from math import ceil
+import datetime
 import os
-import random
-import re
-from sqlite3 import IntegrityError
 import uuid
-from pdf2image import convert_from_path
-import psutil
-import pycountry
-import pyotp
-import qrcode
-from datetime import date, datetime, timedelta
-import pytz
-from flask import Blueprint, Response, abort, after_this_request, current_app, flash, g, json, jsonify, make_response, render_template, request, redirect, send_file, send_from_directory, session, url_for
-from flask_login import login_user, logout_user, login_required, current_user, user_logged_in
-import requests
-from werkzeug.datastructures import FileStorage
-from werkzeug.utils import secure_filename
-from werkzeug.security import check_password_hash, generate_password_hash
-from sqlalchemy.orm import aliased, joinedload
-from sqlalchemy import Integer, and_, case, cast, exists, extract, func, or_
-from wtforms import DecimalField, SubmitField, TextAreaField
-from app import EAT, now_eat, mongo, UPLOAD_FOLDER, ALLOWED_EXTENSIONS
-from app import mail
-from app import google 
-from app import github 
-import phonenumbers
-from phonenumbers import NumberParseException, PhoneMetadata, parse, is_valid_number, format_number, PhoneNumberFormat
-from user_agents import parse as parse_ua  # install: pip install pyyaml user-agents
-from docx import Document
-from docx.shared import Cm, Pt, RGBColor
-from docx.enum.section import WD_ORIENT
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
-from io import BytesIO
-from app.modal import Project, User, UserRole
 
+from bson import ObjectId
+from flask import Blueprint, abort, current_app, flash, make_response, redirect, render_template, request, url_for
+from flask_login import current_user, login_required, login_user, logout_user
+from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
+
+from app import EAT, now_eat, mongo, UPLOAD_FOLDER, ALLOWED_EXTENSIONS
+from app.modal import Project, User, UserRole
 
 
 bp = Blueprint('main', __name__)

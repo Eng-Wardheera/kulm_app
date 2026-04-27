@@ -3,9 +3,6 @@ import enum
 from flask_login import UserMixin
 from datetime import datetime
 from sqlalchemy.dialects.mysql import ENUM  # Make sure this is the MySQL ENUM
-import pytz
-from sqlalchemy import DECIMAL, UniqueConstraint, event
-from werkzeug.security import check_password_hash, generate_password_hash
 from app import now_eat
 
 
