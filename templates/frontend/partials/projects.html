@@ -1,0 +1,102 @@
+<section class="ftco-section bg-light section-sm" id="projects-section">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center section-title">
+          <h2 class="mb-0 text-nowrap mr-3">Our Projects</h2>
+          <div class="border-top flex-grow-1 border-primary"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row justify-content-left">
+      {% for project in projects %}
+        <div class="col-lg-4 col-sm-6 mb-5">
+          <div class="card p-0 border-primary rounded-0 hover-shadow" 
+               style="cursor: pointer;">
+            
+            <div class="position-relative" onclick="openProjectModal(this)"
+                 data-title="{{ project.title }}"
+                 data-desc="{{ project.description }}"
+                 data-video="{{ project.video_path }}"
+                 data-url="{{ project.video_url }}">
+              
+              <img class="card-img-top rounded-0" src="{{ url_for('static', filename=project.thumbnail) }}" height="230" alt="project image" style="object-fit: cover;">
+              
+              <div class="play-overlay" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">
+                <i class="fa fa-play-circle text-white" style="font-size: 60px; opacity: 0.8; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);"></i>
+              </div>
+
+              <div class="position-absolute bg-primary text-white text-center py-2 px-3 rounded" style="top:0;left:0;font-weight:bold;">
+                <div style="font-size:12px;">PROJECT</div>
+              </div>
+            </div>
+            
+            <div class="card-body">
+              <ul class="list-inline mb-2">
+                <li class="list-inline-item"><i class="ti-calendar mr-1 text-color"></i>{{ project.created_at.strftime('%m-%d-%Y') }}</li>
+              </ul>
+              
+              <h4 class="card-title">{{ project.title|truncate(21, True, '...') }}</h4>
+              
+              <p class="card-text mb-4"> {{ project.description|truncate(50, True, '...') }}</p>
+              
+              <a href="{{ url_for('main.single_project', project_id=project.id) }}" class="btn btn-primary btn-sm">View Details</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="modalTitle">Project Title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="videoContainer" class="mb-3 d-flex justify-content-center"></div>
+        <p id="modalDesc" class="mt-3 text-muted"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openProjectModal(element) {
+    const title = element.getAttribute('data-title');
+    const desc = element.getAttribute('data-desc');
+    const videoPath = element.getAttribute('data-video');
+    const videoUrl = element.getAttribute('data-url');
+
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalDesc').innerText = desc;
+    
+    const videoContainer = document.getElementById('videoContainer');
+    videoContainer.innerHTML = ''; 
+
+    // Hubinta in video-ga uu jiro
+    if (videoPath && videoPath !== "None" && videoPath !== "") {
+        videoContainer.innerHTML = `
+            <video width="100%" controls autoplay class="shadow rounded">
+                <source src="/static/${videoPath}" type="video/mp4">
+            </video>`;
+    } else if (videoUrl && videoUrl !== "None" && videoUrl !== "") {
+        videoContainer.innerHTML = `
+            <div class="ratio ratio-16x9">
+                <iframe src="${videoUrl}" allowfullscreen></iframe>
+            </div>`;
+    }
+
+    var myModal = new bootstrap.Modal(document.getElementById('projectModal'));
+    myModal.show();
+}
+
+const projectModal = document.getElementById('projectModal');
+projectModal.addEventListener('hidden.bs.modal', function () {
+    document.getElementById('videoContainer').innerHTML = '';
+});
+</script>
