@@ -39,8 +39,8 @@
           <div class="position-relative" onclick="openProjectModal(this)"
                data-title="{{ project.title }}"
                data-desc="{{ project.description }}"
-               data-video="{{ project.video_path }}"
-               data-url="{{ project.video_url }}">
+               data-video="{{ project.video_path or '' }}"
+               data-url="{{ project.video_url or '' }}">
 
             <img class="card-img-top rounded-0"
                  src="{{ url_for('static', filename=project.thumbnail) }}"
@@ -50,12 +50,7 @@
             <div class="play-overlay"
                  style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">
               <i class="fa fa-play-circle text-white"
-                 style="font-size:60px; opacity:0.8; text-shadow:2px 2px 4px rgba(0,0,0,0.5);"></i>
-            </div>
-
-            <div class="position-absolute bg-primary text-white text-center py-2 px-3 rounded"
-                 style="top:0;left:0;font-weight:bold;">
-              <div style="font-size:12px;">PROJECT</div>
+                 style="font-size:60px; opacity:0.8;"></i>
             </div>
 
           </div>
@@ -147,19 +142,39 @@ function openProjectModal(element) {
     const videoPath = element.getAttribute('data-video');
     const videoUrl = element.getAttribute('data-url');
 
+    /* LOCAL VIDEO */
     if (videoPath && videoPath !== "None" && videoPath !== "") {
         videoContainer.innerHTML = `
-            <video width="100%" controls autoplay class="shadow rounded">
+            <video id="modalVideo" width="100%" controls autoplay class="shadow rounded">
                 <source src="/static/${videoPath}" type="video/mp4">
             </video>
         `;
     }
 
+    /* YOUTUBE / URL */
     else if (videoUrl && videoUrl !== "None" && videoUrl !== "") {
+
+        let videoId = null;
+
+        if (videoUrl.includes("youtu.be/")) {
+            videoId = videoUrl.split("/").pop().split("?")[0];
+        }
+        else if (videoUrl.includes("watch?v=")) {
+            videoId = new URL(videoUrl).searchParams.get("v");
+        }
+
+        const embed = videoId
+            ? `https://www.youtube.com/embed/${videoId}?autoplay=1`
+            : videoUrl;
+
         videoContainer.innerHTML = `
-            <div class="ratio ratio-16x9 w-100">
-                <iframe src="${videoUrl}" allowfullscreen></iframe>
-            </div>
+            <iframe id="modalFrame"
+                width="100%" height="400"
+                src="${embed}"
+                frameborder="0"
+                allow="autoplay; encrypted-media"
+                allowfullscreen>
+            </iframe>
         `;
     }
 
@@ -168,8 +183,9 @@ function openProjectModal(element) {
 }
 
 
-/* CLOSE MODAL */
+/* CLOSE MODAL (FULL FIX) */
 function closeProjectModal() {
+
     const modalEl = document.getElementById('projectModal');
 
     if (projectModalInstance) {
@@ -182,28 +198,38 @@ function closeProjectModal() {
 }
 
 
-/* CLEAR VIDEO */
+/* CLEAR VIDEO (STOP PLAYBACK) */
 function clearVideo() {
-    document.getElementById('videoContainer').innerHTML = '';
+
+    const videoContainer = document.getElementById("videoContainer");
+
+    /* remove iframe completely */
+    videoContainer.innerHTML = '';
+
+    /* stop HTML5 video if exists */
+    const video = document.getElementById("modalVideo");
+    if (video) {
+        video.pause();
+        video.currentTime = 0;
+    }
 }
 
 
-/* AUTO CLEAR */
+/* AUTO CLEAR ON CLOSE */
 document.getElementById('projectModal')
 .addEventListener('hidden.bs.modal', function () {
     clearVideo();
 });
 
 
-/* SEARCH FUNCTION */
+/* SEARCH */
 document.getElementById("projectSearch").addEventListener("keyup", function () {
     let value = this.value.toLowerCase();
-    let items = document.querySelectorAll(".project-item");
 
-    items.forEach(function (item) {
-        let text = item.innerText.toLowerCase();
-        item.style.display = text.includes(value) ? "" : "none";
+    document.querySelectorAll(".project-item").forEach(item => {
+        item.style.display = item.innerText.toLowerCase().includes(value) ? "" : "none";
     });
 });
 
 </script>
+

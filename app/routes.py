@@ -296,19 +296,17 @@ def add_user():
 @login_required
 def edit_user(user_id):
     if current_user.role != 'superadmin':
-        return abort(403) # ama redirect(url_for('login'))
-        
-    # 1. Soo hel user-ka
+        return abort(403)
+
     raw_user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
     if not raw_user:
         flash("User-ka lama helin!", "danger")
         return redirect(url_for('main.index'))
 
-    # 2. U beddel User class-ka si aad u isticmaasho user.attribute
     user = User(raw_user)
 
     if request.method == 'POST':
-        # 3. Ururi xogta cusub
+
         updated_data = {
             "fullname": request.form.get('fullname'),
             "username": request.form.get('username'),
@@ -322,30 +320,43 @@ def edit_user(user_id):
             "updated_at": datetime.utcnow()
         }
 
-        # 4. Handle Photo
-        if 'photo' in request.files:
-            file = request.files['photo']
-            if file and file.filename != '':
-                # Samee folder-ka haddii uusan jirin
-                upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'users')
-                os.makedirs(upload_dir, exist_ok=True)
-                
-                # Magaca faylka oo la badbaadiyay (unique filename)
-                filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
-                file_path = os.path.join(upload_dir, filename)
-                file.save(file_path)
-                
-                # Ku kaydi relative path DB-ga
-                updated_data["photo"] = f"uploads/users/{filename}"
+        file = request.files.get('photo')
 
-        # 5. Save to MongoDB
-        mongo.db.users.update_one({"_id": ObjectId(user_id)}, {"$set": updated_data})
+        if file and file.filename:
+
+            # ✔ ROOT PROJECT PATH (NOT APP INTERNAL PATH)
+            project_root = os.path.abspath(os.getcwd())
+
+            upload_dir = os.path.join(
+                project_root,
+                'static',
+                'backend',
+                'uploads',
+                'users'
+            )
+
+            os.makedirs(upload_dir, exist_ok=True)
+
+            filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+            file_path = os.path.join(upload_dir, filename)
+
+            file.save(file_path)
+
+            # DB PATH (static accessible)
+            updated_data["photo"] = f"backend/uploads/users/{filename}"
+
+        mongo.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": updated_data}
+        )
+
         flash("Macluumaadka si guul leh ayaa loo cusbooneysiiyey!", "success")
         return redirect(url_for('main.edit_user', user_id=user_id))
 
-    # GET Request: U gudbi object-ka template-ka
-    return render_template("backend/pages/components/users/edit_user.html", user=user)
-
+    return render_template(
+        "backend/pages/components/users/edit_user.html",
+        user=user
+    )
 
 
 
@@ -388,82 +399,104 @@ def all_users():
     return render_template('backend/pages/components/users/all_users.html', users=users)
 
 
-
 @bp.route('/add-project', methods=['GET', 'POST'])
 @login_required
 def add_project():
+
+    # 🔒 Only superadmin allowed
     if current_user.role != 'superadmin':
-        return abort(403) # ama redirect(url_for('login'))
-        
+        return abort(403)
+
     if request.method == 'POST':
-        # 1. Deji jidka 'static' (External static folder)
-        # Waxaan isticmaalaynaa "static" toos ah si uu ula jaanqaado habkaaga site_settings
+
+        # Base upload directory
         base_dir = os.path.join("static", "backend", "uploads", "projects")
-        
-        # --- THUMBNAIL LOGIC ---
-        # Default path
+
+        # =========================
+        # THUMBNAIL UPLOAD
+        # =========================
         thumb_db_path = "backend/uploads/projects/thumbnails/no_image.jpg"
         image = request.files.get('thumbnail')
-        
+
         if image and image.filename != '':
-            # Unique naming
+
             ext = os.path.splitext(image.filename)[1]
             unique_name = f"{uuid.uuid4().hex[:8]}{ext}"
-            
+
             save_folder = os.path.join(base_dir, 'thumbnails')
             os.makedirs(save_folder, exist_ok=True)
-            
+
             image_path = os.path.join(save_folder, unique_name)
             image.save(image_path)
-            
-            # Kaydso path-ka loo isticmaalo database-ka
+
             thumb_db_path = f"backend/uploads/projects/thumbnails/{unique_name}"
 
-        # --- GALLERY LOGIC ---
+        # =========================
+        # GALLERY UPLOAD
+        # =========================
         gallery_db_paths = []
         gallery_files = request.files.getlist('gallery')
-        
+
         if gallery_files:
+
             save_gallery = os.path.join(base_dir, 'gallery')
             os.makedirs(save_gallery, exist_ok=True)
-            
+
             for file in gallery_files:
                 if file and file.filename != '':
+
                     unique_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(file.filename)}"
                     file_path = os.path.join(save_gallery, unique_name)
                     file.save(file_path)
-                    
-                    # Kaydso path-ka database-ka
-                    gallery_db_paths.append(f"backend/uploads/projects/gallery/{unique_name}")
 
-        # --- VIDEO LOGIC ---
+                    gallery_db_paths.append(
+                        f"backend/uploads/projects/gallery/{unique_name}"
+                    )
+
+        # =========================
+        # VIDEO UPLOAD (FILE)
+        # =========================
         video_db_path = ""
         video = request.files.get('video_file')
-        
+
         if video and video.filename != '':
+
             ext = os.path.splitext(video.filename)[1]
             unique_name = f"{uuid.uuid4().hex[:8]}{ext}"
-            
+
             save_video = os.path.join(base_dir, 'videos')
             os.makedirs(save_video, exist_ok=True)
-            
+
             video_path = os.path.join(save_video, unique_name)
             video.save(video_path)
-            
-            # Kaydso path-ka database-ka
+
             video_db_path = f"backend/uploads/projects/videos/{unique_name}"
 
-        # 2. Save Project to MongoDB
+        # =========================
+        # VIDEO URL (YOUTUBE / EXTERNAL)
+        # =========================
+        video_url = request.form.get('video_url', '').strip()
+
+        # =========================
+        # SAVE TO MONGODB
+        # =========================
         new_project = {
             "user_id": current_user.id,
             "title": request.form.get('title'),
             "description": request.form.get('description'),
+
             "thumbnail": thumb_db_path,
             "gallery": gallery_db_paths,
+
             "video": {
-                "url": request.form.get('video_url'),
+                "url": video_url,
                 "path": video_db_path
             },
+
+            # 🔥 optional fallback (extra safety)
+            "video_url": video_url,
+            "video_path": video_db_path,
+
             "social_links": {
                 "github": request.form.get('github'),
                 "live_demo": request.form.get('live_demo'),
@@ -472,100 +505,159 @@ def add_project():
                 "facebook": request.form.get('facebook'),
                 "tiktok": request.form.get('tiktok')
             },
+
             "created_at": datetime.utcnow()
         }
-        
+
         mongo.db.projects.insert_one(new_project)
+
         flash("Project-ga si guul leh ayaa loo kaydiyay!", "success")
+
         return redirect(url_for('main.add_project'))
 
-    return render_template("backend/pages/components/projects/add_project.html")
-
+    return render_template(
+        "backend/pages/components/projects/add_project.html"
+    )
 
 
 @bp.route('/edit-project/<project_id>', methods=['GET', 'POST'])
 @login_required
 def edit_project(project_id):
+
+    # 🔒 Only superadmin allowed
     if current_user.role != 'superadmin':
-        return abort(403) # ama redirect(url_for('login'))
-        
-    # 1. Soo hel project-ga
+        return abort(403)
+
+    # =========================
+    # GET PROJECT
+    # =========================
     project = mongo.db.projects.find_one({"_id": ObjectId(project_id)})
-    
+
     if not project:
         flash("Project-ga lama helin!", "danger")
         return redirect(url_for('main.all_projects'))
 
+    base_dir = os.path.join("static", "backend", "uploads", "projects")
+
     if request.method == 'POST':
-        base_dir = os.path.join("static", "backend", "uploads", "projects")
-        
-        # --- A. THUMBNAIL LOGIC ---
+
+        # =====================================================
+        # THUMBNAIL (REPLACE + DELETE OLD)
+        # =====================================================
         new_thumb_path = project.get('thumbnail')
         image = request.files.get('thumbnail')
-        
-        if image and image.filename != '':
-            # Tirtir kii hore
+
+        if image and image.filename:
+
             if project.get('thumbnail') and 'no_image' not in project.get('thumbnail'):
-                old_path = os.path.join(os.getcwd(), project.get('thumbnail'))
-                if os.path.exists(old_path):
-                    os.remove(old_path)
-            
-            # Kaydi kan cusub
+                old_thumb = os.path.join(os.getcwd(), project['thumbnail'])
+                if os.path.exists(old_thumb):
+                    os.remove(old_thumb)
+
             ext = os.path.splitext(image.filename)[1]
-            unique_name = f"{uuid.uuid4().hex[:8]}{ext}"
+            unique_name = f"{uuid.uuid4().hex[:10]}{ext}"
+
             save_folder = os.path.join(base_dir, 'thumbnails')
             os.makedirs(save_folder, exist_ok=True)
+
             image_path = os.path.join(save_folder, unique_name)
             image.save(image_path)
+
             new_thumb_path = f"backend/uploads/projects/thumbnails/{unique_name}"
 
-        # --- B. GALLERY LOGIC ---
-        # Waxaan ka helaynaa list-ka hore, haddii ay jiraan kuwo cusub ayaan ku darnaa
-        gallery_paths = project.get('gallery', [])
+        # =====================================================
+        # GALLERY (REPLACE MODE + DELETE OLD)
+        # =====================================================
         gallery_files = request.files.getlist('gallery')
-        
-        if gallery_files and gallery_files[0].filename != '':
+
+        if gallery_files and gallery_files[0].filename:
+
+            # DELETE OLD GALLERY FILES
+            for old_img in project.get('gallery', []):
+                old_path = os.path.join(os.getcwd(), old_img)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+
+            gallery_paths = []
+
             save_gallery = os.path.join(base_dir, 'gallery')
             os.makedirs(save_gallery, exist_ok=True)
-            
+
             for file in gallery_files:
-                if file and file.filename != '':
-                    unique_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(file.filename)}"
+                if file and file.filename:
+
+                    unique_name = f"{uuid.uuid4().hex[:10]}_{secure_filename(file.filename)}"
                     file_path = os.path.join(save_gallery, unique_name)
                     file.save(file_path)
-                    gallery_paths.append(f"backend/uploads/projects/gallery/{unique_name}")
 
-        # --- C. VIDEO LOGIC ---
+                    gallery_paths.append(
+                        f"backend/uploads/projects/gallery/{unique_name}"
+                    )
+        else:
+            gallery_paths = project.get('gallery', [])
+
+        # =====================================================
+        # VIDEO (FILE OR URL SWITCH CLEAN)
+        # =====================================================
         video_data = project.get('video', {"url": "", "path": ""})
-        video = request.files.get('video_file')
-        
-        if video and video.filename != '':
-            # Tirtir kii hore haddii uu jiro
+
+        video_file = request.files.get('video_file')
+        video_url = request.form.get('video_url')
+
+        # -------------------------
+        # IF FILE UPLOADED
+        # -------------------------
+        if video_file and video_file.filename:
+
+            # delete old file
             if video_data.get('path'):
-                old_video = os.path.join(os.getcwd(), video_data.get('path'))
+                old_video = os.path.join(os.getcwd(), video_data['path'])
                 if os.path.exists(old_video):
                     os.remove(old_video)
-            
-            # Kaydi kan cusub
-            ext = os.path.splitext(video.filename)[1]
-            unique_name = f"{uuid.uuid4().hex[:8]}{ext}"
+
+            ext = os.path.splitext(video_file.filename)[1]
+            unique_name = f"{uuid.uuid4().hex[:10]}{ext}"
+
             save_video = os.path.join(base_dir, 'videos')
             os.makedirs(save_video, exist_ok=True)
-            video_path = os.path.join(save_video, unique_name)
-            video.save(video_path)
-            video_data['path'] = f"backend/uploads/projects/videos/{unique_name}"
-        
-        # Update video URL haddii uu cusub yahay
-        if request.form.get('video_url'):
-            video_data['url'] = request.form.get('video_url')
 
-        # --- UPDATE DATABASE ---
+            video_path = os.path.join(save_video, unique_name)
+            video_file.save(video_path)
+
+            video_data = {
+                "path": f"backend/uploads/projects/videos/{unique_name}",
+                "url": ""
+            }
+
+        # -------------------------
+        # IF URL ONLY
+        # -------------------------
+        elif video_url:
+            if video_data.get('path'):
+                old_video = os.path.join(os.getcwd(), video_data['path'])
+                if os.path.exists(old_video):
+                    os.remove(old_video)
+
+            video_data = {
+                "path": "",
+                "url": video_url
+            }
+
+        # =====================================================
+        # FINAL UPDATE
+        # =====================================================
         updated_data = {
             "title": request.form.get('title'),
             "description": request.form.get('description'),
+
             "thumbnail": new_thumb_path,
             "gallery": gallery_paths,
+
             "video": video_data,
+
+            "video_url": video_data.get('url', ''),
+            "video_path": video_data.get('path', ''),
+
             "social_links": {
                 "github": request.form.get('github'),
                 "live_demo": request.form.get('live_demo'),
@@ -575,16 +667,20 @@ def edit_project(project_id):
                 "tiktok": request.form.get('tiktok')
             }
         }
-        
+
         mongo.db.projects.update_one(
             {"_id": ObjectId(project_id)},
             {"$set": updated_data}
         )
-        
-        flash("Project-ga si guul leh ayaa loo cusboonaysiiyay!", "success")
+
+        flash("Project si guul leh ayaa loo update gareeyay!", "success")
         return redirect(url_for('main.all_projects'))
 
-    return render_template("backend/pages/components/projects/edit_project.html", project=project)
+    return render_template(
+        "backend/pages/components/projects/edit_project.html",
+        project=project
+    )
+
 
 
 @bp.route('/delete-project/<project_id>', methods=['POST'])

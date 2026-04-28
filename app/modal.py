@@ -111,24 +111,28 @@ class User(UserMixin):
 class Project:
     def __init__(self, data=None):
         self.data = data or {}
-        
+
         # Identity & Metadata
         self.id = str(self.data.get("_id", ""))
         self.user_id = str(self.data.get("user_id", ""))
         self.title = self.data.get("title", "Untitled Project")
         self.description = self.data.get("description", "")
-        
-        # Images (Single & Multi)
+
+        # Images
         self.thumbnail = self.data.get("thumbnail", "static/default_thumb.jpg")
-        self.gallery = self.data.get("gallery", []) # Waxay noqonaysaa list madhan haddii aysan jirin
-        
-        # Videos (Dict format)
+        self.gallery = self.data.get("gallery", [])
+
+        # Videos (clean + safe handling)
         video_data = self.data.get("video", {})
+
         self.video_url = video_data.get("url", "")
         self.video_path = video_data.get("path", "")
-        
-        # Socials Links (Pre-defined keys for safety)
-        # Tani waxay ka hortagaysaa error-ka haddii key ka maqan yahay
+
+        # 🔥 NEW: direct fallback support (if DB stores video_url outside dict)
+        self.video_url_alt = self.data.get("video_url", "")
+        self.video_path_alt = self.data.get("video_path", "")
+
+        # Socials
         socials = self.data.get("social_links", {})
         self.social_links = {
             "github": socials.get("github", ""),
@@ -138,11 +142,26 @@ class Project:
             "facebook": socials.get("facebook", ""),
             "tiktok": socials.get("tiktok", "")
         }
-        
+
         self.created_at = self.data.get("created_at")
 
+    # 🔥 FINAL VIDEO URL (SMART FALLBACK)
+    def get_video_url(self):
+        return (
+            self.video_url
+            or self.video_url_alt
+            or ""
+        )
+
+    # 🔥 FINAL VIDEO PATH (SMART FALLBACK)
+    def get_video_path(self):
+        return (
+            self.video_path
+            or self.video_path_alt
+            or ""
+        )
+
     def to_dict(self):
-        """U beddel xogta object-ka dictionary si loogu kaydiyo MongoDB."""
         return {
             "user_id": self.user_id,
             "title": self.title,
@@ -159,6 +178,8 @@ class Project:
 
     def __repr__(self):
         return f"<Project Title: {self.title}>"
+
+
 
 class Contact:
     def __init__(self, data):
