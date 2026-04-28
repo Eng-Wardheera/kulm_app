@@ -141,6 +141,7 @@ def register():
 
     if request.method == 'POST':
         username = request.form.get('username')
+        fullname = request.form.get('fullname')
         email = request.form.get('email')
         password = request.form.get('password')
         confirm_password = request.form.get('password_confirmation')
@@ -161,6 +162,7 @@ def register():
 
         # 4. Save
         new_user = {
+            "fullname": fullname,
             "username": username,
             "email": email,
             "password": generate_password_hash(password),
@@ -204,7 +206,7 @@ def login():
         else:
             flash("Email ama Password khaldan!", "danger")
             # Waxaan u beddelay 'auth.login' si uu ugu laabto isla boggaas
-            return redirect(url_for('auth.login')) 
+            return redirect(url_for('main.login')) 
 
     return render_template("backend/auth/auth-login.html")
 
@@ -332,6 +334,7 @@ def edit_user(user_id):
             "role": request.form.get('role'),
             "country": request.form.get('country'),
             "phone": request.form.get('phone'),
+            "password": request.form.get('password'),
             "address": request.form.get('address'),
             "bio": request.form.get('bio'),
             "status": True if request.form.get('status') == '1' else False,

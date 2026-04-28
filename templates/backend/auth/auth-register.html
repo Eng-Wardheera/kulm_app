@@ -31,6 +31,10 @@
             />
             <input
               class="w-full px-4 py-2 border rounded-md dark:bg-darker dark:border-gray-700"
+              type="text" name="fullname" placeholder="Fullname" required
+            />
+            <input
+              class="w-full px-4 py-2 border rounded-md dark:bg-darker dark:border-gray-700"
               type="email" name="email" placeholder="Email address" required
             />
             <input
@@ -56,5 +60,41 @@
         </div>
       </main>
     </div>
+
+    	   <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Flash message handling with SweetAlert2 -->
+<script>
+   // Flash message handling with SweetAlert2
+   const flashMessages = {{ get_flashed_messages(with_categories=True) | tojson | safe }};
+   
+   if (flashMessages.length > 0) {
+       const [category, message] = flashMessages[0];
+   
+       const Toast = Swal.mixin({
+           toast: true,
+           position: 'top-end',
+           showConfirmButton: false,
+           timer: 3000,
+           timerProgressBar: true,
+           background: '#fff',
+           color: '#333',
+           didOpen: (toast) => {
+               toast.addEventListener('mouseenter', Swal.stopTimer)
+               toast.addEventListener('mouseleave', Swal.resumeTimer)
+           }
+       });
+   
+       Toast.fire({
+           icon: category === "success" ? "success" : "info",
+           title: message
+       });
+   }
+</script>
+
+
+
+
   </body>
 </html>
