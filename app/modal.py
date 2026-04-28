@@ -2,7 +2,6 @@ from decimal import Decimal
 import enum
 from flask_login import UserMixin
 from datetime import datetime
-from sqlalchemy.dialects.mysql import ENUM  # Make sure this is the MySQL ENUM
 from app import now_eat
 
 

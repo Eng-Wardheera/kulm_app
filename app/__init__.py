@@ -79,7 +79,6 @@ def create_app():
 
     app.config["MONGO_URI"] = mongo_uri
 
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
     # create_app() dhexdiisa
