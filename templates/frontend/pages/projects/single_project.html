@@ -82,32 +82,32 @@
         {% endif %}
 
         <!-- ================= GALLERY ================= -->
-       <!-- ================= GALLERY ================= -->
-{% if project.gallery %}
-<div class="mt-5">
-  <h3 class="border-bottom pb-2">Gallery</h3>
+        <!-- ================= GALLERY ================= -->
+        {% if project.gallery %}
+        <div class="mt-5">
+          <h3 class="border-bottom pb-2">Gallery</h3>
 
-  <div class="row">
+          <div class="row">
 
-    {% for img in project.gallery %}
-    <div class="col-md-4 col-sm-6 mb-4 text-center">
+            {% for img in project.gallery %}
+            <div class="col-md-4 col-sm-6 mb-4 text-center">
 
-      <!-- IMAGE LABEL -->
-      <small class="text-muted d-block mb-1">
-        Image {{ loop.index }}
-      </small>
+              <!-- IMAGE LABEL -->
+              <small class="text-muted d-block mb-1">
+                Image {{ loop.index }}
+              </small>
 
-      <img src="{{ url_for('static', filename=img) }}"
-           class="img-fluid rounded shadow-sm"
-           style="height:200px;object-fit:cover;cursor:pointer;"
-           onclick="zoomImage(this.src)">
+              <img src="{{ url_for('static', filename=img) }}"
+                  class="img-fluid rounded shadow-sm"
+                  style="height:200px;object-fit:cover;cursor:pointer;"
+                  onclick="zoomImage(this.src)">
 
-    </div>
-    {% endfor %}
+            </div>
+            {% endfor %}
 
-  </div>
-</div>
-{% endif %}
+          </div>
+        </div>
+        {% endif %}
 
 
         <!-- NAVIGATION -->
@@ -171,7 +171,9 @@
                 <div>
                     <h5 class="mb-0">{{ owner.fullname }}</h5>
                     <p class="text-muted mb-0 small">{{ owner.role|capitalize }}</p>
-                   <a href="https://web.whatsapp.com/send?phone={{ owner.phone }} "><p class="text-muted mb-0 small">{{ owner.phone }}</p></a> 
+<a href="https://api.whatsapp.com/send?phone={{ owner.phone }}&text=Hi%20Welcome%20to%20Kulmiye%20Tech">
+    <p class="text-muted mb-0 small">{{ owner.phone }}</p>
+</a>
                 </div>
             </div>
             <a href="mailto:{{ owner.email }}" class="btn btn-primary btn-sm mt-3 w-100">Contact Owner</a>
