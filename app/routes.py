@@ -45,21 +45,27 @@ def create_guest_session(mongo):
 # 1. Index route: Wuxuu soo bandhigayaa page-ka iyo data-da projects-ka
 @bp.route('/', methods=['GET'])
 def index():
-    # 1. Halkan ka hel tirada xogta (Counts)
+
     project_count = mongo.db.projects.count_documents({})
     user_count = mongo.db.users.count_documents({})
     contact_count = mongo.db.contacts.count_documents({})
-    
-    # 2. Hel xogta projects-ka sida aad hore u samaysay
+
+    # ✅ TOTAL VISITS COUNT (sessions collection)
+    visits_count = mongo.db.sessions.count_documents({})
+
     cursor = mongo.db.projects.find().sort("created_at", -1)
     projects = [Project(data) for data in cursor]
-    
-    # 3. U dir template-ka (index.html)
-    return render_template("frontend/home/index.html", 
-                           projects=projects,
-                           project_count=project_count,
-                           user_count=user_count,
-                           contact_count=contact_count)
+
+    return render_template(
+        "frontend/home/index.html",
+        projects=projects,
+        project_count=project_count,
+        user_count=user_count,
+        contact_count=contact_count,
+        visits_count=visits_count   # 👈 ADD THIS
+    )
+
+
 
 # 2. Contact Submit: Wuxuu qabanayaa kaliya POST request-ka
 @bp.route('/contact-submit', methods=['POST'])
