@@ -1,13 +1,14 @@
 <section class="ftco-counter img bg-light" id="section-counter">
     <div class="container">
         <div class="row">
+
             <div class="col-md-3 justify-content-center counter-wrap ftco-animate">
                 <div class="block-18 d-flex">
                     <div class="icon d-flex justify-content-center align-items-center">
                         <span class="flaticon-suitcase"></span>
                     </div>
                     <div class="text">
-                        <strong class="number" data-number="{{ project_count }}">{{ project_count }}</strong>
+                        <strong class="number" data-number="{{ project_count }}">0</strong>
                         <span>Project Complete</span>
                     </div>
                 </div>
@@ -19,7 +20,7 @@
                         <span class="flaticon-loyalty"></span>
                     </div>
                     <div class="text">
-                        <strong class="number" data-number="{{ user_count }}">{{ user_count }}</strong>
+                        <strong class="number" data-number="{{ user_count }}">0</strong>
                         <span>Registered Users</span>
                     </div>
                 </div>
@@ -31,19 +32,19 @@
                         <span class="flaticon-listening"></span>
                     </div>
                     <div class="text">
-                        <strong class="number" data-number="{{ contact_count }}">{{ contact_count }}</strong>
+                        <strong class="number" data-number="{{ contact_count }}">0</strong>
                         <span>Messages/Contacts</span>
                     </div>
                 </div>
             </div>
 
-           <div class="col-md-3 justify-content-center counter-wrap ftco-animate">
+            <div class="col-md-3 justify-content-center counter-wrap ftco-animate">
                 <div class="block-18 d-flex">
                     <div class="icon d-flex justify-content-center align-items-center">
                         <span class="flaticon-calendar"></span>
                     </div>
                     <div class="text">
-                        <strong class="number" data-number="{{ visits_count }}+">0</strong>
+                        <strong class="number" data-number="{{ visits_count }}">0</strong>
                         <span>Total Visits</span>
                     </div>
                 </div>
@@ -52,3 +53,48 @@
         </div>
     </div>
 </section>
+
+<script>
+function formatNumber(num) {
+    if (isNaN(num)) return "0";
+
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1).replace(/\.0$/, '') + "M";
+    }
+    else if (num >= 1000) {
+        return (num / 1000).toFixed(1).replace(/\.0$/, '') + "K";
+    }
+    else {
+        return num.toString();
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll('.number').forEach(el => {
+
+        let target = parseInt(el.getAttribute('data-number')) || 0;
+        let count = 0;
+
+        let increment = Math.ceil(target / 80);
+
+        // start clean
+        el.innerText = "0";
+
+        let timer = setInterval(() => {
+
+            count += increment;
+
+            if (count >= target) {
+                el.innerText = formatNumber(target) + "+";
+                clearInterval(timer);
+            } else {
+                el.innerText = formatNumber(count) + "+";
+            }
+
+        }, 20);
+
+    });
+
+});
+</script>

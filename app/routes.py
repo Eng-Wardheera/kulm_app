@@ -217,22 +217,20 @@ def dashboard():
         
     return render_template("backend/home/dashbaord.html", user=current_user)
 
-
 @bp.route('/add-user', methods=['GET', 'POST'])
 @login_required
 def add_user():
+
     if current_user.role != 'superadmin':
-        return abort(403) # ama redirect(url_for('login'))
-        
-    # 1. Halkan waa liiska waddamada (Kala soo bax database ama API)
+        return abort(403)
+
     countries = [
         {"code": "SO", "name": "Somalia", "flag_url": "https://flagcdn.com/so.svg"},
         {"code": "KE", "name": "Kenya", "flag_url": "https://flagcdn.com/ke.svg"},
-        # Ku dar inta kale...
     ]
 
     if request.method == 'POST':
-        # Xogta ka soo qaad form-ka
+
         fullname = request.form.get('fullname')
         username = request.form.get('username')
         email = request.form.get('email')
@@ -246,7 +244,7 @@ def add_user():
         status = True if request.form.get('status') == '1' else False
         address = request.form.get('address')
 
-        # Validation
+        # ================= VALIDATION =================
         if password != confirm_password:
             flash("Passwords-ka isma laha!", "danger")
             return redirect(url_for('main.add_user'))
@@ -255,18 +253,35 @@ def add_user():
             flash("Email-kan horey ayaa loo isticmaalay!", "danger")
             return redirect(url_for('main.add_user'))
 
-        # File Upload Logic
-        photo_filename = "" # Default
-        if 'photo' in request.files:
-            file = request.files['photo']
-            if file and file.filename != '':
-                filename = secure_filename(file.filename)
-                # Ku keydi folder-ka uploads (Hubi inaad folder-kaas samaysay)
-                upload_path = os.path.join(current_app.root_path, 'static/backend/uploads/images')
-                file.save(os.path.join(upload_path, filename))
-                photo_filename = filename
+        # ================= PHOTO UPLOAD =================
+        photo_path = ""
 
-        # 4. Save User
+        file = request.files.get('photo')
+
+        if file and file.filename:
+
+            # ✔ PROJECT ROOT (NOT APP INTERNAL)
+            project_root = os.path.abspath(os.getcwd())
+
+            upload_dir = os.path.join(
+                project_root,
+                'static',
+                'backend',
+                'uploads',
+                'users'
+            )
+
+            os.makedirs(upload_dir, exist_ok=True)
+
+            filename = f"{uuid.uuid4().hex}_{secure_filename(file.filename)}"
+            file_path = os.path.join(upload_dir, filename)
+
+            file.save(file_path)
+
+            # DB stores PUBLIC path
+            photo_path = f"backend/uploads/users/{filename}"
+
+        # ================= CREATE USER =================
         new_user = {
             "fullname": fullname,
             "username": username,
@@ -279,16 +294,19 @@ def add_user():
             "city": city,
             "status": status,
             "address": address,
-            "photo": photo_filename,
+            "photo": photo_path,
             "created_at": datetime.utcnow()
         }
-        
+
         mongo.db.users.insert_one(new_user)
+
         flash(f"User {username} si guul leh ayaa loo diiwaangeliyey!", "success")
-        return redirect(url_for('main.add_user')) # Ama u dir liiska users-ka
+        return redirect(url_for('main.add_user'))
 
-    return render_template("backend/pages/components/users/add_user.html", countries=countries)
-
+    return render_template(
+        "backend/pages/components/users/add_user.html",
+        countries=countries
+    )
 
 
 
@@ -324,7 +342,23 @@ def edit_user(user_id):
 
         if file and file.filename:
 
-            # ✔ ROOT PROJECT PATH (NOT APP INTERNAL PATH)
+            # ================= DELETE OLD IMAGE =================
+            old_photo = raw_user.get("photo")
+
+            if old_photo:
+                old_path = os.path.join(
+                    os.path.abspath(os.getcwd()),
+                    'static',
+                    old_photo
+                )
+
+                if os.path.exists(old_path):
+                    try:
+                        os.remove(old_path)
+                    except Exception as e:
+                        print(f"Error deleting old image: {e}")
+
+            # ================= SAVE NEW IMAGE =================
             project_root = os.path.abspath(os.getcwd())
 
             upload_dir = os.path.join(
@@ -342,7 +376,7 @@ def edit_user(user_id):
 
             file.save(file_path)
 
-            # DB PATH (static accessible)
+            # DB PATH
             updated_data["photo"] = f"backend/uploads/users/{filename}"
 
         mongo.db.users.update_one(
@@ -359,24 +393,33 @@ def edit_user(user_id):
     )
 
 
-
 @bp.route('/delete-user/<user_id>', methods=['POST'])
 @login_required
 def delete_user(user_id):
     if current_user.role != 'superadmin':
-        return abort(403) # ama redirect(url_for('login'))
-        
-    # 1. Soo hel user-ka si aad u tirtirto faylka haddii loo baahdo
+        return abort(403)
+
+    # 1. Get user
     user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
-    
-    if user and 'photo' in user:
-        # Faylka tirtir (Optional - haddii aad rabto inaad booska server-ka u kaydiso)
-        file_path = os.path.join(os.path.dirname(current_app.root_path), 'static', user['photo'])
+
+    # 2. Delete image file if exists
+    if user and user.get('photo'):
+
+        # correct project root
+        project_root = os.path.abspath(os.getcwd())
+
+        file_path = os.path.join(
+            project_root,
+            'static',
+            user['photo']  # example: backend/uploads/users/xxx.jpg
+        )
+
         if os.path.exists(file_path):
             os.remove(file_path)
 
-    # 2. Tirtir database-ka
+    # 3. Delete user from DB
     mongo.db.users.delete_one({"_id": ObjectId(user_id)})
+
     flash("User-ka si guul leh ayaa loo tirtiray!", "success")
     return redirect(url_for('main.all_users'))
 
