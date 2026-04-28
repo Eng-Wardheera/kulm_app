@@ -48,7 +48,7 @@ def index():
 
     project_count = mongo.db.projects.count_documents({})
     user_count = mongo.db.users.count_documents({})
-    contact_count = mongo.db.contacts.count_documents({})
+    contact_count = mongo.db.contact.count_documents({})
     visits_count = mongo.db.sessions.count_documents({})
 
     cursor = mongo.db.projects.find().sort("created_at", -1)
