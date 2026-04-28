@@ -1,59 +1,167 @@
-<section class="ftco-about ftco-section ftco-no-pt ftco-no-pb" id="about-section">
-    <div class="container">
-        <div class="row d-flex no-gutters">
-            <div class="col-md-6 col-lg-5 d-flex">
-                <div class="img-about img d-flex align-items-stretch">
-                    <div class="overlay"></div>
-                    <div class="img d-flex align-self-stretch align-items-center" style="background-image:url('static/backend/uploads/users/kulmiye.jpeg');">
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-7 pl-md-4 pl-lg-5 py-5">
-                <div class="py-md-5">
-                    <div class="row justify-content-start pb-3">
-                        <div class="col-md-12 heading-section ftco-animate">
-                            <span class="subheading">My Intro</span>
-                            <h2 class="mb-4" style="font-size: 34px; text-transform: capitalize;">About Me</h2>
-                            <p>I am a passionate and skilled Software Engineer with expertise in Hardware Engineering for Troubleshooting, Web Development, and Mobile Application Development. Dedicated to building efficient, scalable, and user-friendly applications with a commitment to innovation and continuous growth.</p>
+<style>
+/* TABS STYLE */
+.custom-tabs {
+  margin-top: 20px;
+}
 
-                            <ul class="about-info mt-4 px-md-0 px-2">
-                                <li class="d-flex"><span>Name:</span> <span>Ahmed Rashid Aden</span></li>
-                                <li class="d-flex"><span>Address:</span> <span>Mogadishu, Somalia</span></li>
-                                <li class="d-flex"><span>Email:</span> <span>ahmedrashiidaden@gmail.com</span></li>
-                                <li class="d-flex"><span>Phone: </span> <span>+252618552904</span></li>
-                            </ul>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="my-interest d-lg-flex w-100">
-                                <div class="interest-wrap d-flex align-items-center">
-                                    <div class="icon d-flex align-items-center justify-content-center">
-                                        <span class="flaticon-listening"></span>
-                                    </div>
-                                    <div class="text">Coding</div>
-                                </div>
-                                <div class="interest-wrap d-flex align-items-center">
-                                    <div class="icon d-flex align-items-center justify-content-center">
-                                        <span class="flaticon-suitcases"></span>
-                                    </div>
-                                    <div class="text">Travel</div>
-                                </div>
-                                <div class="interest-wrap d-flex align-items-center">
-                                    <div class="icon d-flex align-items-center justify-content-center">
-                                        <span class="flaticon-video-player"></span>
-                                    </div>
-                                    <div class="text">Graphics</div>
-                                </div>
-                                <div class="interest-wrap d-flex align-items-center">
-                                    <div class="icon d-flex align-items-center justify-content-center">
-                                        <span class="flaticon-football"></span>
-                                    </div>
-                                    <div class="text">Research</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+.tab-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab-buttons button {
+  padding: 10px 15px;
+  border: none;
+  background: #eee;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.tab-buttons button.active {
+  background: #007bff;
+  color: #fff;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* ABOUT INFO FIX */
+.about-info li {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.about-info li span:last-child {
+  word-break: break-word;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .about-info li {
+    flex-direction: column;
+  }
+}
+</style>
+
+<section class="ftco-about ftco-section" id="about-section">
+  <div class="container">
+    <div class="row d-flex no-gutters">
+
+      <!-- IMAGE -->
+      <div class="col-md-6 col-lg-5 d-flex">
+        <div class="img-about w-100">
+          <div class="img w-100" style="background-image:url('static/backend/uploads/users/kulmiye.jpeg'); min-height:300px; background-size:cover;"></div>
         </div>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="col-md-6 col-lg-7 pl-md-4 py-5">
+        
+        <span class="subheading">My Intro</span>
+        <h2>About Me</h2>
+
+        <p>
+          I am a passionate and skilled Software Engineer with expertise in Hardware Engineering,
+          Web Development, and Mobile Application Development.
+        </p>
+
+        <!-- TABS -->
+        <div class="custom-tabs">
+
+          <!-- BUTTONS -->
+          <div class="tab-buttons">
+            <button class="active" onclick="openTab(event, 'contact')">Contact Info</button>
+            <button onclick="openTab(event, 'experience')">Experience</button>
+            <button onclick="openTab(event, 'education')">Education</button>
+            <button onclick="openTab(event, 'certificates')">Certificates</button>
+          </div>
+
+          <!-- CONTACT -->
+          <div id="contact" class="tab-content active">
+            <ul class="about-info">
+              <li><span>Name:</span> <span>Ahmed Rashid Aden</span></li>
+              <li><span>Address:</span> <span>Mogadishu, Somalia</span></li>
+              <li><span>Email:</span> <span>liilove668@gmail.com</span></li>
+              <li><span>Phone:</span> <span>+252618552904</span></li>
+            </ul>
+          </div>
+
+          <!-- EXPERIENCE -->
+          <div id="experience" class="tab-content">
+            <p><strong>Secretary</strong><br>American Refugee Committee (ARC) | Feb 2017 – May 2018</p>
+
+            <p><strong>Computer Teacher</strong><br>
+            Bright International Technology Institute | Jan 2019 – Jun 2021<br>
+            Horsed Academy | Nov 2022 – Nov 2025<br>
+            Buule Institute | Nov 2025 – Present</p>
+
+            <p><strong>English Teacher</strong><br>
+            Horyal Institute | Dec 2020 – Feb 2021<br>
+            Sooyaal Institute | Nov 2025 – Present</p>
+
+            <p><strong>Exam Officer</strong><br>
+            Timir School | Jan 2026 – Present</p>
+          </div>
+
+          <!-- EDUCATION -->
+          <div id="education" class="tab-content">
+            <p><strong>Primary School</strong><br>
+            Iftin School, Kenya | 2008 – 2015<br>
+            Farjano School, Somalia | 2017 – 2021</p>
+
+            <p><strong>University</strong><br>
+            Bachelor Degree – Jamhuriye University | 2021 – 2025</p>
+
+            <p><strong>English Language</strong><br>
+            Halgan Academy | 2012 – 2014<br>
+            Sunrise Institute | 2015 – 2016</p>
+
+            <p><strong>Computer Skills</strong><br>
+            Darwish Institute | 2018 – 2020</p>
+          </div>
+
+          <!-- CERTIFICATES -->
+          <div id="certificates" class="tab-content">
+            <ul>
+              <li>Bachelor of Computer Applications – 2021–2025</li>
+              <li>Somalia Government Certificate – 2020–2021</li>
+              <li>Leaving Certificate – 2015</li>
+              <li>English Certificate – 2014</li>
+              <li>English Certificate – 2016</li>
+              <li>Computer Certificate – 2020</li>
+              <li>Video Graphic Design – 2024</li>
+              <li>Graphic Design – 2024</li>
+            </ul>
+          </div>
+
+        </div>
+
+      </div>
     </div>
+  </div>
 </section>
+
+<script>
+function openTab(evt, tabName) {
+  let i, tabcontent, tabbuttons;
+
+  tabcontent = document.getElementsByClassName("tab-content");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].classList.remove("active");
+  }
+
+  tabbuttons = document.querySelectorAll(".tab-buttons button");
+  tabbuttons.forEach(btn => btn.classList.remove("active"));
+
+  document.getElementById(tabName).classList.add("active");
+  evt.currentTarget.classList.add("active");
+}
+</script>

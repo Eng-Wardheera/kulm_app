@@ -1,87 +1,100 @@
 <section class="ftco-section contact-section ftco-no-pb" id="contact-section">
-		<div class="container">
-			<div class="row justify-content-center mb-5 pb-3">
-				<div class="col-md-7 heading-section text-center ftco-animate">
-					<span class="subheading">Contact us</span>
-					<h2 class="mb-4">Have a Project?</h2>
-					<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia</p>
-				</div>
-			</div>
+  <div class="container">
 
-			<div class="row block-9">
-				<div class="col-md-8">
-				<form action="{{ url_for('main.contact_submit') }}" method="POST" class="bg-light p-4 p-md-5 contact-form">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <input type="text" name="name" class="form-control" placeholder="Your Name" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <input type="email" name="email" class="form-control" placeholder="Your Email" required>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <input type="text" name="subject" class="form-control" placeholder="Subject" required>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <textarea name="message" cols="30" rows="7" class="form-control" placeholder="Message" required></textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <input type="submit" value="Send Message" class="btn btn-primary py-3 px-5">
-                            </div>
-                        </div>
-                    </div>
-                </form>
-					
-				</div>
+    <!-- Heading -->
+    <div class="row justify-content-center mb-5 pb-3">
+      <div class="col-md-7 heading-section text-center ftco-animate">
+        <span class="subheading">Contact us</span>
+        <h2 class="mb-4">Have a Project?</h2>
+        <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia</p>
+      </div>
+    </div>
 
-				<div class="col-md-4 d-flex pl-md-5">
-					<div class="row">
-						<div class="dbox w-100 d-flex">
-							<div class="icon d-flex align-items-center justify-content-center">
-								<span class="fa fa-map-marker"></span>
-							</div>
-							<div class="text">
-								<p><span>Address:</span> Mogadishu, Somalia</p>
-							</div>
-						</div>
-						
-						<div class="dbox w-100 d-flex">
-							<div class="icon d-flex align-items-center justify-content-center">
-								<span class="fa fa-phone"></span>
-							</div>
-							<div class="text">
-								<p><span>Phone:</span> <a href="tel:+252618552904">+252 618 552904</a></p>
-							</div>
-						</div>
-						
-						<div class="dbox w-100 d-flex">
-							<div class="icon d-flex align-items-center justify-content-center">
-								<span class="fa fa-paper-plane"></span>
-							</div>
-							<div class="text">
-								<p><span>Email:</span> <a href="mailto:ahmedrashiidaden@gmail.com">ahmedrashiidaden@gmail.com</a></p>
-							</div>
-						</div>
-						
-						<div class="dbox w-100 d-flex">
-							<div class="icon d-flex align-items-center justify-content-center">
-								<span class="fa fa-linkedin"></span>
-							</div>
-							<div class="text">
-								<p><span>LinkedIn:</span> <a href="https://www.linkedin.com/in/eng-kulmiye" target="_blank">eng-kulmiye</a></p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
-	
+    <!-- Split Section -->
+    <div class="row block-9">
+
+      <!-- LEFT: FORM -->
+      <div class="col-lg-7 col-md-12 mb-4">
+        <form action="#" class="bg-light p-4 p-md-5 contact-form h-100">
+          <div class="row">
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <input type="text" class="form-control" placeholder="Your Name">
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <input type="text" class="form-control" placeholder="Your Email">
+              </div>
+            </div>
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <input type="text" class="form-control" placeholder="Subject">
+              </div>
+            </div>
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <textarea cols="30" rows="7" class="form-control" placeholder="Message"></textarea>
+              </div>
+            </div>
+
+            <div class="col-md-12 text-center text-md-left">
+              <div class="form-group">
+                <input type="submit" value="Send Message" class="btn btn-primary py-3 px-5 w-100 w-md-auto">
+              </div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+      <!-- RIGHT: CONTACT INFO -->
+      <div class="col-lg-5 col-md-12 d-flex">
+        <div class="bg-white p-4 p-md-5 w-100">
+
+          <div class="dbox w-100 d-flex mb-3">
+            <div class="icon d-flex align-items-center justify-content-center">
+              <span class="fa fa-map-marker"></span>
+            </div>
+            <div class="text pl-3">
+              <p><span>Address:</span> Mogadishu, Somalia</p>
+            </div>
+          </div>
+
+          <div class="dbox w-100 d-flex mb-3">
+            <div class="icon d-flex align-items-center justify-content-center">
+              <span class="fa fa-phone"></span>
+            </div>
+            <div class="text pl-3">
+              <p><span>Phone:</span> <a href="tel:+252618552904">+252 618 552904</a></p>
+            </div>
+          </div>
+
+          <div class="dbox w-100 d-flex mb-3">
+            <div class="icon d-flex align-items-center justify-content-center">
+              <span class="fa fa-paper-plane"></span>
+            </div>
+            <div class="text pl-3">
+              <p><span>Email:</span> <a href="mailto:ahmedrashiidaden@gmail.com">liilove668@gmail.com</a></p>
+            </div>
+          </div>
+
+          <div class="dbox w-100 d-flex">
+            <div class="icon d-flex align-items-center justify-content-center">
+              <span class="fa fa-linkedin"></span>
+            </div>
+            <div class="text pl-3">
+              <p><span>LinkedIn:</span> <a href="https://www.linkedin.com/in/eng-kulmiye" target="_blank">eng-kulmiye</a></p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
