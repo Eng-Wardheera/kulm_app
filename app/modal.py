@@ -1,7 +1,7 @@
 from decimal import Decimal
 import enum
 from flask_login import UserMixin
-from datetime import datetime
+from datetime import datetime, timedelta
 from app import now_eat
 
 
@@ -194,6 +194,41 @@ class Contact:
     def __repr__(self):
         return f"<Contact {self.subject} from {self.name}>"
 
+class Session:
+    def __init__(self, data):
+        self.data = data or {}
 
+        self.id = str(self.data.get("_id"))
+        self.user_id = str(self.data.get("user_id"))
+
+        self.session_token = self.data.get("session_token")
+        self.ip = self.data.get("ip")
+        self.device = self.data.get("device")
+
+        self.created_at = self.data.get("created_at", datetime.utcnow())
+        self.expires_at = self.data.get(
+            "expires_at",
+            datetime.utcnow() + timedelta(days=7)
+        )
+
+    def is_expired(self):
+        return datetime.utcnow() > self.expires_at
+
+    def is_active(self):
+        return not self.is_expired()
+
+    def to_dict(self):
+        return {
+            "_id": self.id,
+            "user_id": self.user_id,
+            "session_token": self.session_token,
+            "ip": self.ip,
+            "device": self.device,
+            "created_at": self.created_at,
+            "expires_at": self.expires_at
+        }
+
+    def __repr__(self):
+        return f"<Session {self.session_token}>"
 
 

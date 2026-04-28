@@ -1,14 +1,17 @@
 import datetime
 import os
+import secrets
 import uuid
 
 from bson import ObjectId
-from flask import Blueprint, abort, current_app, flash, make_response, redirect, render_template, request, url_for
+from flask import Blueprint, abort, current_app, flash, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
+from app import ALLOWED_EXTENSIONS
+from app.extensions import mongo
+from datetime import datetime
 
-from app import EAT, now_eat, mongo, UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 from app.modal import Project, User, UserRole
 
 
@@ -20,6 +23,23 @@ bp = Blueprint('main', __name__)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
  
+def create_guest_session(mongo):
+    if not session.get("guest_token"):
+
+        token = secrets.token_hex(24)
+
+        session["guest_token"] = token
+
+        mongo.db.sessions.insert_one({
+            "session_token": token,
+            "user_id": None,   # guest
+            "ip": request.remote_addr,
+            "device": request.user_agent.string,
+            "created_at": datetime.utcnow(),
+            "expires_at": None,
+            "routes": []   # store visited pages
+        })
+
 
 
 # 1. Index route: Wuxuu soo bandhigayaa page-ka iyo data-da projects-ka

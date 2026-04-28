@@ -4,13 +4,13 @@ import os
 import traceback
 from flask import Flask, flash, redirect, render_template, url_for
 from flask_cors import CORS
-from flask_mail import Mail
-from flask_pymongo import PyMongo
 from flask_login import LoginManager, current_user
 from authlib.integrations.flask_client import OAuth
 import pytz
 from dotenv import load_dotenv
-
+from app.tracker import init_tracker
+from app.extensions import mongo, mail
+from datetime import datetime
 
 
 
@@ -18,9 +18,7 @@ from dotenv import load_dotenv
 
 
 # Extensions - single instance only!
-mongo = PyMongo()   # ✅ MongoDB
 
-mail = Mail()  # Create Mail instance
 login_manager = LoginManager()
 
  # Enable CSRF globally
@@ -65,6 +63,9 @@ def create_app():
         template_folder="../templates",
         static_folder="../static"
     )
+
+   
+
 
     # Secure Secret Key
     app.secret_key = os.getenv('SECRET_KEY', 'XWt7819618552904Sm32Mxx2102dklF')
@@ -140,7 +141,8 @@ def create_app():
         return getattr(obj, name, None)
 
     # Import and register your routes (assuming routes.py)
-   
+    init_tracker(app, mongo)
+
  
     # Initialize extensions
     mongo.init_app(app)
@@ -157,7 +159,8 @@ def create_app():
         if not value:
             return ''
         return value.strftime('%Y-%m-%dT%H:%M')
-    
+
+
     # 28 Example: in filters.py (Jinja filter)
     @app.template_filter('datetimeformat_input_dateOnly')
     def datetimeformat_input_dateOnly(value):
@@ -175,9 +178,11 @@ def create_app():
     
     app.register_blueprint(bp) # ,url_prefix='/main'
     
+   
+
 
     # Oggolow dhammaan domains ama ku xadid domain gaar ah:
-    
+  
 
     @app.errorhandler(404)
     def not_found_error(error):
