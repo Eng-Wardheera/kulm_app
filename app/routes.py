@@ -806,7 +806,7 @@ def logout():
         flash("You have been logged out! Your session record remains for inspection.", "success")
 
     # Clear remember_token cookie to prevent auto-login
-    resp = make_response(redirect(url_for("main.login")))
+    resp = make_response(redirect(url_for("main.index")))
     resp.set_cookie("remember_token", "", expires=0)
     return resp
 
