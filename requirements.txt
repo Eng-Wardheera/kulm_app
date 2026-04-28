@@ -25,6 +25,6 @@ pyotp
 authlib
 
 timedelta
-secrets
+
 
 python-slugify
