@@ -4,108 +4,140 @@
 
 {% block content %}
 
-<section class="hero-wrap hero-wrap-2" 
-         style="background-image: url('{{ url_for('static', filename=project.thumbnail) }}');" 
+<section class="hero-wrap hero-wrap-2"
+         style="background-image: url('{{ url_for('static', filename=project.thumbnail) }}');"
          data-stellar-background-ratio="0.5">
   <div class="overlay"></div>
   <div class="container">
     <div class="row no-gutters slider-text align-items-end justify-content-center">
       <div class="col-md-9 ftco-animate pb-5 text-center">
-       <h1 class="mb-0 bread">{{ project.title }}</h1>
-       <p class="breadcrumbs">
-         <span><a href="{{ url_for('main.index') }}">Home <i class="fa fa-chevron-right"></i></a></span> 
-         <span>Project Details</span>
-       </p>
-     </div>
-   </div>
- </div>
+        <h1 class="mb-0 bread">{{ project.title }}</h1>
+        <p class="breadcrumbs">
+          <span><a href="{{ url_for('main.index') }}">Home <i class="fa fa-chevron-right"></i></a></span>
+          <span>Project Details</span>
+        </p>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section class="ftco-section">
   <div class="container">
     <div class="row">
-      
+
       <div class="col-lg-8 ftco-animate">
         <h2 class="mb-3">{{ project.title }}</h2>
-        
-        <p><img src="{{ url_for('static', filename=project.thumbnail) }}" alt="{{ project.title }}" class="img-fluid w-100 rounded shadow-sm"></p>
-        
+
+        <p>
+          <img src="{{ url_for('static', filename=project.thumbnail) }}"
+               class="img-fluid w-100 rounded shadow-sm">
+        </p>
+
         <div class="project-description text-justify">
-            {{ project.description|safe }}
+          {{ project.description|safe }}
         </div>
 
         {% if project.video_path or project.video_url %}
         <div class="mt-5">
-            <h3 class="mb-3 border-bottom pb-2">Project Video</h3>
-            {% if project.video_path %}
-                <video width="100%" controls class="shadow rounded">
-                    <source src="{{ url_for('static', filename=project.video_path) }}" type="video/mp4">
-                </video>
-            {% elif project.video_url %}
-                <div class="ratio ratio-16x9">
-                    <iframe src="{{ project.video_url }}" allowfullscreen></iframe>
-                </div>
-            {% endif %}
+          <h3 class="mb-3 border-bottom pb-2">Project Video</h3>
+          {% if project.video_path %}
+            <video width="100%" controls class="shadow rounded">
+              <source src="{{ url_for('static', filename=project.video_path) }}" type="video/mp4">
+            </video>
+          {% elif project.video_url %}
+            <div class="ratio ratio-16x9">
+              <iframe src="{{ project.video_url }}" allowfullscreen></iframe>
+            </div>
+          {% endif %}
         </div>
         {% endif %}
 
         {% if project.gallery and project.gallery|length > 0 %}
         <div class="mt-5">
-            <h3 class="mb-3 border-bottom pb-2">Gallery</h3>
-            <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner shadow rounded">
-                    {% for img in project.gallery %}
-                    <div class="carousel-item {{ 'active' if loop.first }}">
-                        <img src="{{ url_for('static', filename=img) }}" 
-                             class="d-block w-100" 
-                             style="cursor: zoom-in; height: 400px; object-fit: cover;" 
-                             alt="Gallery image" 
-                             onclick="zoomImage(this.src)">
+          <h3 class="mb-3 border-bottom pb-2">Gallery</h3>
+          <div class="row">
+            {% for img in project.gallery %}
+            <div class="col-md-4 col-sm-6 mb-4">
+                <div class="card shadow-sm h-100 border-0">
+                    <img src="{{ url_for('static', filename=img) }}"
+                         class="card-img-top img-fluid"
+                         style="height:200px; object-fit:cover; cursor:pointer;"
+                         onclick="zoomImage(this.src)"
+                         alt="Gallery Image">
+                    <div class="card-body p-2 text-center">
+                        <small class="text-muted">Image {{ loop.index }}</small>
                     </div>
-                    {% endfor %}
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true"></span>
-                </button>
             </div>
+            {% endfor %}
+          </div>
         </div>
         {% endif %}
+
+        <div class="row mt-5">
+          <div class="col-6 text-left">
+            {% if prev_project %}
+            <a href="{{ url_for('main.single_project', project_id=prev_project.id) }}"
+               class="btn btn-outline-primary btn-sm">
+               ← Previous Project
+            </a>
+            {% endif %}
+          </div>
+          <div class="col-6 text-right">
+            {% if next_project %}
+            <a href="{{ url_for('main.single_project', project_id=next_project.id) }}"
+               class="btn btn-outline-primary btn-sm">
+               Next Project →
+            </a>
+            {% endif %}
+          </div>
+        </div>
       </div>
 
       <div class="col-lg-4 sidebar ftco-animate">
-        
         <div class="sidebar-box p-4 bg-light shadow-sm">
           <h3 class="heading-sidebar mb-3">Project Info</h3>
-          <p><strong>Created:</strong> {{ project.created_at.strftime('%Y-%m-%d') if project.created_at else 'N/A' }}</p>
+          <p>
+            <strong>Created:</strong>
+            {{ project.created_at.strftime('%Y-%m-%d') if project.created_at else 'N/A' }}
+          </p>
+
           <h4 class="mt-4">Links</h4>
           <ul class="categories list-unstyled">
             {% for platform, url in project.social_links.items() %}
-                {% if url %}
-                <li class="mb-2"><a href="{{ url }}" target="_blank"><i class="fa fa-external-link mr-2"></i> {{ platform|capitalize }}</a></li>
-                {% endif %}
+              {% if url %}
+              <li class="mb-2">
+                <a href="{{ url }}" target="_blank">
+                  <i class="fa fa-external-link mr-2"></i> {{ platform|capitalize }}
+                </a>
+              </li>
+              {% endif %}
             {% endfor %}
           </ul>
         </div>
 
         {% if owner %}
         <div class="sidebar-box p-4 bg-light shadow-sm mt-4">
-            <h3 class="heading-sidebar mb-3">Project Owner</h3>
-            <div class="d-flex align-items-center">
-                <img src="{{ url_for('static', filename=owner.photo) if owner.photo else url_for('static', filename='images/default-user.png') }}" 
-                     class="rounded-circle mr-3" width="60" height="60" style="object-fit:cover;">
-                <div>
-                    <h5 class="mb-0">{{ owner.fullname }}</h5>
-                    <p class="text-muted mb-0 small">{{ owner.role|capitalize }}</p>
-                </div>
+          <h3 class="heading-sidebar mb-3">Project Owner</h3>
+          <div class="d-flex align-items-center">
+            <img src="{{ url_for('static', filename=owner.photo) if owner.photo else url_for('static', filename='images/default-user.png') }}"
+                 class="rounded-circle mr-3"
+                 width="60"
+                 height="60"
+                 style="object-fit:cover;">
+            <div>
+              <h5 class="mb-0">{{ owner.fullname }}</h5>
+              <p class="text-muted mb-0 small">{{ owner.role|capitalize }}</p>
             </div>
-            <a href="mailto:{{ owner.email }}" class="btn btn-primary btn-sm mt-3 w-100">Contact Owner</a>
+          </div>
+          <a href="mailto:{{ owner.email }}"
+             class="btn btn-primary btn-sm mt-3 w-100">
+            Contact Owner
+          </a>
         </div>
         {% endif %}
-
       </div>
+
     </div>
   </div>
 </section>
@@ -114,25 +146,20 @@
   <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content bg-transparent border-0">
       <div class="modal-header border-0">
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body text-center">
-        <img id="modalImage" src="" class="img-fluid rounded" style="max-height: 80vh;">
+        <img id="modalImage" src="" class="img-fluid rounded" style="max-height:80vh;">
       </div>
     </div>
   </div>
 </div>
 
 <script>
-    // Zoom function
-    function zoomImage(src) {
-        const modalImage = document.getElementById('modalImage');
-        modalImage.src = src;
-        var myModal = new bootstrap.Modal(document.getElementById('zoomModal'));
-        myModal.show();
-    }
+function zoomImage(src) {
+    document.getElementById('modalImage').src = src;
+    new bootstrap.Modal(document.getElementById('zoomModal')).show();
+}
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 {% endblock %}
