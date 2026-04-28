@@ -45,27 +45,3 @@
         </div>
     </div>
 </section>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
-
-<script>
-$(document).ready(function(){
-  $('.home-slider').owlCarousel({
-    loop: true,             // Enables infinite scrolling
-    autoplay: true,         // Automatically moves
-    autoplayTimeout: 5000,  // Adjust speed (5000ms = 5 seconds)
-    margin: 0,
-    animateOut: 'fadeOut',  // Smooth transition
-    animateIn: 'fadeIn',
-    nav: false,             // Set to true if you want arrows
-    dots: true,             // Shows navigation dots
-    items: 1,               // Ensures only one item shows at a time
-    responsive:{
-      0:{ items:1 },
-      600:{ items:1 },
-      1000:{ items:1 }
-    }
-  });
-});
-</script>

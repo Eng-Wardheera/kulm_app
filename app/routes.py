@@ -49,8 +49,6 @@ def index():
     project_count = mongo.db.projects.count_documents({})
     user_count = mongo.db.users.count_documents({})
     contact_count = mongo.db.contacts.count_documents({})
-
-    # ✅ TOTAL VISITS COUNT (sessions collection)
     visits_count = mongo.db.sessions.count_documents({})
 
     cursor = mongo.db.projects.find().sort("created_at", -1)
@@ -62,8 +60,9 @@ def index():
         project_count=project_count,
         user_count=user_count,
         contact_count=contact_count,
-        visits_count=visits_count   # 👈 ADD THIS
+        visits_count=visits_count
     )
+
 
 
 
