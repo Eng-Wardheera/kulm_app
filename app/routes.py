@@ -67,21 +67,18 @@ def index():
 
 
 
-# 2. Contact Submit: Wuxuu qabanayaa kaliya POST request-ka
 @bp.route('/contact-submit', methods=['POST'])
 def contact_submit():
-    # 1. Ka soo qaad xogta foomka
+
     name = request.form.get('name')
     email = request.form.get('email')
     subject = request.form.get('subject')
     message = request.form.get('message')
 
-    # 2. Validation
-    if not name or not email or not subject or not message:
+    if not all([name, email, subject, message]):
         flash("Fadlan buuxi dhammaan meelaha bannaan!", "danger")
         return redirect(url_for('main.index') + "#contact-section")
 
-    # 3. Diyaarinta Xogta
     contact_entry = {
         "user_id": current_user.id if current_user.is_authenticated else None,
         "name": name,
@@ -92,17 +89,14 @@ def contact_submit():
         "created_at": datetime.utcnow()
     }
 
-    # 4. Save to MongoDB
     try:
         mongo.db.contact.insert_one(contact_entry)
         flash("Farriintaada waa la diray, mahadsanid!", "success")
     except Exception as e:
+        print(e)
         flash("Cilad ayaa dhacday, fadlan isku day mar kale.", "danger")
-        print(f"Database Error: {e}")
 
-    # 5. Redirect ku samee home page-ka, kuna dar anchor tag (#contact-section)
     return redirect(url_for('main.index') + "#contact-section")
-
 
 
 
