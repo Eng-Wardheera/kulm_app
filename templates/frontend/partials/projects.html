@@ -1,5 +1,7 @@
 <section class="ftco-section bg-light" id="projects-section">
   <div class="container">
+
+    <!-- TITLE -->
     <div class="row">
       <div class="col-12">
         <div class="d-flex flex-wrap align-items-center section-title">
@@ -9,94 +11,199 @@
       </div>
     </div>
 
-    <div class="row justify-content-left">
-      {% for project in projects %}
-        <div class="col-lg-4 col-sm-6 mb-5">
-          <div class="card p-0 border-primary rounded-0 hover-shadow" 
-               style="cursor: pointer;">
-            
-            <div class="position-relative" onclick="openProjectModal(this)"
-                 data-title="{{ project.title }}"
-                 data-desc="{{ project.description }}"
-                 data-video="{{ project.video_path }}"
-                 data-url="{{ project.video_url }}">
-              
-              <img class="card-img-top rounded-0" src="{{ url_for('static', filename=project.thumbnail) }}" height="230" alt="project image" style="object-fit: cover;">
-              
-              <div class="play-overlay" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">
-                <i class="fa fa-play-circle text-white" style="font-size: 60px; opacity: 0.8; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);"></i>
-              </div>
+    <!-- SEARCH + COUNTER -->
+    <div class="row mb-4 align-items-center">
 
-              <div class="position-absolute bg-primary text-white text-center py-2 px-3 rounded" style="top:0;left:0;font-weight:bold;">
-                <div style="font-size:12px;">PROJECT</div>
-              </div>
-            </div>
-            
-            <div class="card-body">
-              <ul class="list-inline mb-2">
-                <li class="list-inline-item"><i class="ti-calendar mr-1 text-color"></i>{{ project.created_at.strftime('%m-%d-%Y') }}</li>
-              </ul>
-              
-              <h4 class="card-title">{{ project.title|truncate(21, True, '...') }}</h4>
-              
-              <p class="card-text mb-4"> {{ project.description|truncate(50, True, '...') }}</p>
-              
-              <a href="{{ url_for('main.single_project', project_id=project.id) }}" class="btn btn-primary btn-sm">View Details</a>
-            </div>
-          </div>
+      <div class="col-md-6 mb-2">
+        <input type="text" id="projectSearch" class="form-control"
+               placeholder="Search projects...">
+      </div>
+
+      <div class="col-md-6 text-md-right">
+        <div class="text">
+          <strong class="number" data-number="{{ project_count }}">{{ project_count }}</strong>
+          <span>Project Complete</span>
         </div>
+      </div>
+
+    </div>
+
+    <!-- PROJECT LIST -->
+    <div class="row justify-content-left" id="projectList">
+
+      {% for project in projects %}
+      <div class="col-lg-4 col-sm-6 mb-5 project-item">
+
+        <div class="card p-0 border-primary rounded-0 hover-shadow" style="cursor:pointer;">
+
+          <div class="position-relative" onclick="openProjectModal(this)"
+               data-title="{{ project.title }}"
+               data-desc="{{ project.description }}"
+               data-video="{{ project.video_path }}"
+               data-url="{{ project.video_url }}">
+
+            <img class="card-img-top rounded-0"
+                 src="{{ url_for('static', filename=project.thumbnail) }}"
+                 height="230"
+                 style="object-fit:cover;">
+
+            <div class="play-overlay"
+                 style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">
+              <i class="fa fa-play-circle text-white"
+                 style="font-size:60px; opacity:0.8; text-shadow:2px 2px 4px rgba(0,0,0,0.5);"></i>
+            </div>
+
+            <div class="position-absolute bg-primary text-white text-center py-2 px-3 rounded"
+                 style="top:0;left:0;font-weight:bold;">
+              <div style="font-size:12px;">PROJECT</div>
+            </div>
+
+          </div>
+
+          <div class="card-body">
+
+            <ul class="list-inline mb-2">
+              <li class="list-inline-item">
+                <i class="ti-calendar mr-1 text-color"></i>
+                {{ project.created_at.strftime('%m-%d-%Y') }}
+              </li>
+            </ul>
+
+            <h4 class="card-title">{{ project.title }}</h4>
+
+            <p class="card-text mb-4">
+              {{ project.description|truncate(50, True, '...') }}
+            </p>
+
+            <a href="{{ url_for('main.single_project', project_id=project.id) }}"
+               class="btn btn-primary btn-sm">
+              View Details
+            </a>
+
+          </div>
+
+        </div>
+      </div>
       {% endfor %}
+
     </div>
   </div>
 </section>
 
+
+<!-- ================= MODAL ================= -->
 <div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
+
       <div class="modal-header border-0">
         <h5 class="modal-title" id="modalTitle">Project Title</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+        <!-- CLOSE BUTTON -->
+        <button type="button"
+                onclick="closeProjectModal()"
+                style="
+                  border:none;
+                  background:transparent;
+                  font-size:28px;
+                  font-weight:bold;
+                  color:#000;
+                  cursor:pointer;
+                ">
+          &times;
+        </button>
+
       </div>
+
       <div class="modal-body">
+
         <div id="videoContainer" class="mb-3 d-flex justify-content-center"></div>
+
         <p id="modalDesc" class="mt-3 text-muted"></p>
+
       </div>
+
     </div>
   </div>
 </div>
 
+
+<!-- ================= JS ================= -->
 <script>
+
+let projectModalInstance = null;
+
+/* OPEN MODAL */
 function openProjectModal(element) {
-    const title = element.getAttribute('data-title');
-    const desc = element.getAttribute('data-desc');
+
+    const modalEl = document.getElementById('projectModal');
+
+    document.getElementById('modalTitle').innerText = element.getAttribute('data-title');
+    document.getElementById('modalDesc').innerText = element.getAttribute('data-desc');
+
+    const videoContainer = document.getElementById('videoContainer');
+    videoContainer.innerHTML = '';
+
     const videoPath = element.getAttribute('data-video');
     const videoUrl = element.getAttribute('data-url');
 
-    document.getElementById('modalTitle').innerText = title;
-    document.getElementById('modalDesc').innerText = desc;
-    
-    const videoContainer = document.getElementById('videoContainer');
-    videoContainer.innerHTML = ''; 
-
-    // Hubinta in video-ga uu jiro
     if (videoPath && videoPath !== "None" && videoPath !== "") {
         videoContainer.innerHTML = `
             <video width="100%" controls autoplay class="shadow rounded">
                 <source src="/static/${videoPath}" type="video/mp4">
-            </video>`;
-    } else if (videoUrl && videoUrl !== "None" && videoUrl !== "") {
-        videoContainer.innerHTML = `
-            <div class="ratio ratio-16x9">
-                <iframe src="${videoUrl}" allowfullscreen></iframe>
-            </div>`;
+            </video>
+        `;
     }
 
-    var myModal = new bootstrap.Modal(document.getElementById('projectModal'));
-    myModal.show();
+    else if (videoUrl && videoUrl !== "None" && videoUrl !== "") {
+        videoContainer.innerHTML = `
+            <div class="ratio ratio-16x9 w-100">
+                <iframe src="${videoUrl}" allowfullscreen></iframe>
+            </div>
+        `;
+    }
+
+    projectModalInstance = new bootstrap.Modal(modalEl);
+    projectModalInstance.show();
 }
 
-const projectModal = document.getElementById('projectModal');
-projectModal.addEventListener('hidden.bs.modal', function () {
+
+/* CLOSE MODAL */
+function closeProjectModal() {
+    const modalEl = document.getElementById('projectModal');
+
+    if (projectModalInstance) {
+        projectModalInstance.hide();
+    } else {
+        bootstrap.Modal.getInstance(modalEl)?.hide();
+    }
+
+    clearVideo();
+}
+
+
+/* CLEAR VIDEO */
+function clearVideo() {
     document.getElementById('videoContainer').innerHTML = '';
+}
+
+
+/* AUTO CLEAR */
+document.getElementById('projectModal')
+.addEventListener('hidden.bs.modal', function () {
+    clearVideo();
 });
+
+
+/* SEARCH FUNCTION */
+document.getElementById("projectSearch").addEventListener("keyup", function () {
+    let value = this.value.toLowerCase();
+    let items = document.querySelectorAll(".project-item");
+
+    items.forEach(function (item) {
+        let text = item.innerText.toLowerCase();
+        item.style.display = text.includes(value) ? "" : "none";
+    });
+});
+
 </script>
