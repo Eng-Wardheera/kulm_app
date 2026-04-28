@@ -14,7 +14,10 @@
                             <h1 class="mb-4 mt-3">Software Engineer &amp; <span>System Architect</span></h1>
                             <p>
                                 <a href="#contact-section" class="btn btn-primary">Hire me</a> 
-                                <a href="#" class="btn btn-primary btn-outline-primary">Download CV</a>
+                              <a href="javascript:void(0)" class="btn btn-primary btn-outline-primary" onclick="openCVModal()">
+    Preview CV
+</a>
+
                             </p>
                         </div>
                     </div>
@@ -36,12 +39,113 @@
                             <h1 class="mb-4 mt-3">Hi, I am <span>Ahmed Rashid</span>. This is my work.</h1>
                             <p>
                                 <a href="#contact-section" class="btn btn-primary">Hire me</a> 
-                                <a href="#" class="btn btn-primary btn-outline-primary">Preview CV</a>
-                            </p>
+                               
+                                <!-- Button -->
+<a href="javascript:void(0)" class="btn btn-primary btn-outline-primary" onclick="openCVModal()">
+    Preview CV
+</a>
+
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
 </section>
+
+
+
+<!-- CV MODAL -->
+<div id="cvModal" class="cv-modal">
+    <div class="cv-modal-content">
+        <span class="cv-close" onclick="closeCVModal()">&times;</span>
+
+        <iframe 
+            src="static/backend/uploads/cv/Eng Kulmiye - CV.pdf#toolbar=0" 
+            width="100%" 
+            height="600px">
+        </iframe>
+    </div>
+</div>
+
+<style>
+/* MODAL BACKDROP */
+.cv-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.75);
+}
+
+/* MODAL BOX */
+.cv-modal-content {
+    background: #fff;
+    margin: 5% auto;
+    padding: 10px;
+    width: 80%;
+    max-width: 900px;
+    border-radius: 10px;
+    position: relative;
+}
+
+/* CLOSE BUTTON */
+.cv-close {
+    position: absolute;
+    right: 15px;
+    top: 5px;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+/* DISABLE TEXT SELECTION */
+body {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* optional: nicer iframe look */
+.cv-modal-content iframe {
+    border: none;
+    border-radius: 6px;
+}
+</style>
+
+<script>
+const modal = document.getElementById("cvModal");
+
+// OPEN MODAL
+function openCVModal() {
+    modal.style.display = "block";
+    document.body.style.overflow = "hidden"; // disable scroll
+}
+
+// CLOSE MODAL
+function closeCVModal() {
+    modal.style.display = "none";
+    document.body.style.overflow = "auto"; // enable scroll
+}
+
+// CLICK OUTSIDE TO CLOSE
+window.addEventListener("click", function(event) {
+    if (event.target === modal) {
+        closeCVModal();
+    }
+});
+
+// ESC KEY CLOSE
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") {
+        closeCVModal();
+    }
+});
+
+// DISABLE RIGHT CLICK + COPY
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("copy", e => e.preventDefault());
+</script>
