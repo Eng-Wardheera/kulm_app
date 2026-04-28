@@ -5,7 +5,6 @@ import traceback
 from flask import Flask, flash, redirect, render_template, url_for
 from flask_cors import CORS
 from flask_mail import Mail
-from flask_migrate import Migrate
 from flask_pymongo import PyMongo
 from flask_login import LoginManager, current_user
 from authlib.integrations.flask_client import OAuth
@@ -20,7 +19,6 @@ from dotenv import load_dotenv
 
 # Extensions - single instance only!
 mongo = PyMongo()   # ✅ MongoDB
-migrate = Migrate() # 2. Bilow
 
 mail = Mail()  # Create Mail instance
 login_manager = LoginManager()

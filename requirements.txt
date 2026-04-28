@@ -20,11 +20,9 @@ email-validator
 pycountry
 pytz
 
-user-agents
 pyotp
 
 authlib
 
-qrcode
 
 python-slugify
