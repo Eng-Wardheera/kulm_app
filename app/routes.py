@@ -177,18 +177,31 @@ def contact_submit():
 @bp.route('/projects/view')
 def all_projects_view():
     try:
-        # ================= PAGINATION =================
+        # ================= INPUTS =================
         page = request.args.get('page', 1, type=int)
+        search = request.args.get('search', '').strip()
+
         per_page = 6
         skip = (page - 1) * per_page
 
+        # ================= QUERY =================
+        query = {}
+
+        if search:
+            query = {
+                "$or": [
+                    {"title": {"$regex": search, "$options": "i"}},
+                    {"description": {"$regex": search, "$options": "i"}}
+                ]
+            }
+
         # ================= TOTAL COUNT =================
-        total_projects = mongo.db.projects.count_documents({})
+        total_projects = mongo.db.projects.count_documents(query)
 
         # ================= DATA FETCH =================
         cursor = (
             mongo.db.projects
-            .find()
+            .find(query)
             .sort([("created_at", -1)])
             .skip(skip)
             .limit(per_page)
@@ -205,12 +218,14 @@ def all_projects_view():
         # ================= TOTAL PAGES =================
         total_pages = math.ceil(total_projects / per_page) if total_projects else 1
 
+        # ================= RENDER =================
         return render_template(
             'frontend/pages/projects/all_projects.html',
             projects=projects,
             page=page,
             total_pages=total_pages,
-            total_projects=total_projects   # ✅ IMPORTANT FIX
+            total_projects=total_projects,
+            search=search   # 🔥 muhiim
         )
 
     except Exception as e:
@@ -220,8 +235,7 @@ def all_projects_view():
 
         flash("Khalad ayaa dhacay marka projects la soo qaadayay.", "danger")
         return redirect(url_for('main.index'))
-
-    
+  
 
 
 @bp.route('/project/<project_id>')

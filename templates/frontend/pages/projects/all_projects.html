@@ -5,6 +5,7 @@
 {% block content %}
 
 <!-- ================= HERO ================= -->
+
 <section class="hero-wrap hero-wrap-2"
          style="background-image: url('{{ url_for('static', filename='frontend/images/image.png') }}');">
 
@@ -14,198 +15,179 @@
     <div class="row no-gutters slider-text align-items-end justify-content-center">
       <div class="col-md-9 text-center pb-5">
 
-        <h1 class="mb-0 bread">All Projects</h1>
+```
+    <h1 class="mb-0 bread">All Projects</h1>
 
-        <p class="breadcrumbs">
-          <span><a href="{{ url_for('main.index') }}">Home</a></span>
-          <span>Projects</span>
-        </p>
+    <p class="breadcrumbs">
+      <span><a href="{{ url_for('main.index') }}">Home</a></span>
+      <span>Projects</span>
+    </p>
 
-      </div>
-    </div>
+  </div>
+</div>
+```
+
   </div>
 </section>
 
 <!-- ================= SEARCH + COUNTER ================= -->
+
 <section class="ftco-section py-3">
   <div class="container">
 
-    <div class="row mb-3 align-items-center">
+```
+<div class="row mb-3 align-items-center">
 
-      <!-- SEARCH -->
-      <div class="col-md-6">
-        <input type="text" id="projectSearch"
+  <!-- SEARCH -->
+  <div class="col-md-6">
+    <form method="GET" action="{{ url_for('main.all_projects_view') }}">
+      <div class="input-group">
+
+        <input type="text"
+               name="search"
+               value="{{ search }}"
                class="form-control"
                placeholder="Search projects...">
-      </div>
 
-      <!-- COUNTER -->
-      <div class="col-md-6 text-md-right mt-2 mt-md-0">
-        <strong id="totalFound">{{ projects|length }}</strong>
-        <span> / {{ total_projects }} Projects Found</span>
-      </div>
+        <div class="input-group-append">
+          <button class="btn btn-primary" type="submit">
+            Search
+          </button>
+        </div>
 
-    </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- COUNTER -->
+  <div class="col-md-6 text-md-right mt-2 mt-md-0">
+    <strong>{{ projects|length }}</strong>
+    <span> / {{ total_projects }} Projects Found</span>
+  </div>
+
+</div>
+```
 
   </div>
 </section>
 
 <!-- ================= PROJECTS GRID ================= -->
+
 <section class="ftco-section">
   <div class="container">
 
-    <div class="row" id="projectList">
+```
+<div class="row">
 
-      {% if projects and projects|length > 0 %}
+  {% if projects and projects|length > 0 %}
 
-        {% for project in projects %}
-        <div class="col-md-4 mb-4 ftco-animate project-item">
+    {% for project in projects %}
+    <div class="col-md-4 mb-4 ftco-animate">
 
-          <div class="card shadow-sm w-100 border-0">
+      <div class="card shadow-sm w-100 border-0">
 
-            <!-- IMAGE -->
-            <a href="{{ url_for('main.single_project', project_id=project.id) }}">
-              <img src="{{ url_for('static', filename=project.thumbnail) }}"
-                   class="card-img-top"
-                   style="height:220px; object-fit:cover;">
-            </a>
+        <a href="{{ url_for('main.single_project', project_id=project.id) }}">
+          <img src="{{ url_for('static', filename=project.thumbnail) }}"
+               class="card-img-top"
+               style="height:220px; object-fit:cover;">
+        </a>
 
-            <!-- BODY -->
-            <div class="card-body">
+        <div class="card-body">
 
-              <h5 class="card-title">{{ project.title }}</h5>
+          <h5 class="card-title">{{ project.title }}</h5>
 
-              <p class="card-text">
-                {{ (project.description or '')[:100] }}...
-              </p>
+          <p class="card-text">
+            {{ (project.description or '')[:100] }}...
+          </p>
 
-              <a href="{{ url_for('main.single_project', project_id=project.id) }}"
-                 class="btn btn-primary btn-sm">
-                View Details
-              </a>
-
-            </div>
-
-          </div>
+          <a href="{{ url_for('main.single_project', project_id=project.id) }}"
+             class="btn btn-primary btn-sm">
+            View Details
+          </a>
 
         </div>
+
+      </div>
+
+    </div>
+    {% endfor %}
+
+  {% else %}
+
+    <div class="col-12 text-center mt-5">
+      <h4>No projects found</h4>
+      <p class="text-muted">Please check back later.</p>
+    </div>
+
+  {% endif %}
+
+</div>
+
+<!-- ================= PAGINATION ================= -->
+{% if total_pages > 1 %}
+<div class="row mt-4">
+  <div class="col-12 text-center">
+
+    <nav>
+      <ul class="pagination justify-content-center">
+
+        <!-- PREV -->
+        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+          <a class="page-link"
+             href="{{ url_for('main.all_projects_view', page=page-1, search=search) }}">
+            Prev
+          </a>
+        </li>
+
+        <!-- FIRST -->
+        {% if page > 3 %}
+        <li class="page-item">
+          <a class="page-link"
+             href="{{ url_for('main.all_projects_view', page=1, search=search) }}">1</a>
+        </li>
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+
+        <!-- MIDDLE -->
+        {% for p in range(page-2, page+3) %}
+          {% if p > 0 and p <= total_pages %}
+          <li class="page-item {% if p == page %}active{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('main.all_projects_view', page=p, search=search) }}">
+              {{ p }}
+            </a>
+          </li>
+          {% endif %}
         {% endfor %}
 
-      {% else %}
+        <!-- LAST -->
+        {% if page < total_pages - 2 %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+          <li class="page-item">
+            <a class="page-link"
+               href="{{ url_for('main.all_projects_view', page=total_pages, search=search) }}">
+              {{ total_pages }}
+            </a>
+          </li>
+        {% endif %}
 
-        <div class="col-12 text-center mt-5">
-          <h4>No projects found</h4>
-          <p class="text-muted">Please check back later.</p>
-        </div>
+        <!-- NEXT -->
+        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+          <a class="page-link"
+             href="{{ url_for('main.all_projects_view', page=page+1, search=search) }}">
+            Next
+          </a>
+        </li>
 
-      {% endif %}
+      </ul>
+    </nav>
 
-      <!-- NO RESULTS -->
-      <div class="col-12 text-center mt-4" id="noResults" style="display:none;">
-        <h5>No matching projects found</h5>
-      </div>
-
-    </div>
-
-    <!-- ================= PAGINATION ================= -->
-    {% if total_pages > 1 %}
-    <div class="row mt-4">
-      <div class="col-12 text-center">
-
-        <nav>
-          <ul class="pagination justify-content-center">
-
-            <!-- PREV -->
-            <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-              <a class="page-link" href="{{ url_for('main.all_projects_view', page=page-1) }}">
-                Prev
-              </a>
-            </li>
-
-            <!-- FIRST -->
-            {% if page > 3 %}
-            <li class="page-item">
-              <a class="page-link" href="{{ url_for('main.all_projects_view', page=1) }}">1</a>
-            </li>
-            <li class="page-item disabled"><span class="page-link">...</span></li>
-            {% endif %}
-
-            <!-- MIDDLE -->
-            {% set start = page - 2 %}
-            {% set end = page + 2 %}
-
-            {% for p in range(start, end + 1) %}
-              {% if p > 0 and p <= total_pages %}
-              <li class="page-item {% if p == page %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('main.all_projects_view', page=p) }}">
-                  {{ p }}
-                </a>
-              </li>
-              {% endif %}
-            {% endfor %}
-
-            <!-- LAST -->
-            {% if page < total_pages - 2 %}
-              <li class="page-item disabled"><span class="page-link">...</span></li>
-              <li class="page-item">
-                <a class="page-link" href="{{ url_for('main.all_projects_view', page=total_pages) }}">
-                  {{ total_pages }}
-                </a>
-              </li>
-            {% endif %}
-
-            <!-- NEXT -->
-            <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
-              <a class="page-link" href="{{ url_for('main.all_projects_view', page=page+1) }}">
-                Next
-              </a>
-            </li>
-
-          </ul>
-        </nav>
-
-      </div>
-    </div>
-    {% endif %}
+  </div>
+</div>
+{% endif %}
+```
 
   </div>
 </section>
-
-<!-- ================= LIVE SEARCH JS ================= -->
-<script>
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    const searchInput = document.getElementById("projectSearch");
-    const items = document.querySelectorAll(".project-item");
-    const totalFound = document.getElementById("totalFound");
-    const noResults = document.getElementById("noResults");
-
-    searchInput.addEventListener("keyup", function () {
-
-        let value = this.value.toLowerCase().trim();
-        let visibleCount = 0;
-
-        items.forEach(item => {
-
-            let text = item.innerText.toLowerCase();
-
-            if (text.includes(value)) {
-                item.style.display = "";
-                visibleCount++;
-            } else {
-                item.style.display = "none";
-            }
-
-        });
-
-        totalFound.innerText = visibleCount;
-
-        noResults.style.display = visibleCount === 0 ? "block" : "none";
-    });
-
-});
-
-</script>
 
 {% endblock %}
