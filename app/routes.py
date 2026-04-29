@@ -1,3 +1,4 @@
+from collections import defaultdict
 import datetime
 import math
 import os
@@ -13,7 +14,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from app import ALLOWED_EXTENSIONS
 from app.extensions import mongo
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from app.modal import Contact, Project, User, UserRole
 
@@ -53,6 +54,39 @@ def index():
     user_count = mongo.db.users.count_documents({})
     contact_count = mongo.db.contact.count_documents({})
     visits_count = mongo.db.sessions.count_documents({})
+
+  # ================= LAST 7 DAYS VISITS =================
+    today = datetime.utcnow()
+    last_7_days = [(today - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6, -1, -1)]
+
+    visits_map = defaultdict(int)
+
+    sessions = mongo.db.sessions.find({
+        "created_at": {
+            "$gte": today - timedelta(days=7)
+        }
+    })
+
+    for s in sessions:
+        date_str = s.get("created_at").strftime("%Y-%m-%d")
+        visits_map[date_str] += 1
+
+    # 🔥 TOTAL ALL VISITS (e.g. 178)
+    total_visits = mongo.db.sessions.count_documents({}) or 1
+
+    visits_data = []
+
+    for day in last_7_days:
+        count = visits_map.get(day, 0)
+
+        percent = round((count / total_visits) * 100)
+
+        visits_data.append({
+            "date": day,
+            "count": count,
+            "percent": percent
+        })
+
 
     # Projects
     project_cursor = mongo.db.projects.find().sort("created_at", -1).limit(6)
@@ -100,7 +134,8 @@ def index():
         project_count=project_count,
         user_count=user_count,
         contact_count=contact_count,
-        visits_count=visits_count
+        visits_count=visits_count,
+        visits_data=visits_data
     )
 
 

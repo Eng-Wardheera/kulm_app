@@ -54,6 +54,119 @@
     </div>
 </section>
 
+
+<!-- ================= VISITS CHART ================= -->
+<section class="ftco-section bg-white">
+  <div class="container">
+
+    <h4 class="mb-4 text-center">Last 7 Days Visits</h4>
+
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+
+        <!-- CHART -->
+        <canvas id="visitsChart" height="120"></canvas>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+          <table class="table table-bordered mt-4 text-center">
+            <thead class="bg-light">
+              <tr>
+                <th>Date</th>
+                <th>Visits</th>
+                <th>Percentage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for v in visits_data %}
+              <tr>
+                <!-- FORMAT DATE -->
+                <td>{{ v.date }}</td>
+
+                <td>
+                  <strong>{{ v.count }}</strong>
+                </td>
+
+                <td>
+                  <span class="badge badge-primary">
+                    {{ v.percent }}%
+                  </span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ================= CHART ================= -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const visitsData = {{ visits_data | tojson }};
+
+// labels (dates)
+const labels = visitsData.map(v => {
+    const d = new Date(v.date);
+    return d.toLocaleDateString(undefined, {
+        weekday: 'short'
+    });
+});
+
+// values
+const counts = visitsData.map(v => v.count);
+
+// percentages (for tooltip)
+const percentages = visitsData.map(v => v.percent);
+
+const ctx = document.getElementById('visitsChart').getContext('2d');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Visits',
+            data: counts,
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+
+        plugins: {
+            legend: { display: false },
+
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        let i = context.dataIndex;
+                        return counts[i] + " visits (" + percentages[i] + "%)";
+                    }
+                }
+            }
+        },
+
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0
+                }
+            }
+        }
+    }
+});
+</script>
+
+
+
 <script>
 function formatNumber(num) {
     if (isNaN(num)) return "0";
