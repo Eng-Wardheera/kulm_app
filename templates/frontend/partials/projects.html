@@ -2,14 +2,23 @@
   <div class="container">
 
     <!-- TITLE -->
-    <div class="row">
-      <div class="col-12">
-        <div class="d-flex flex-wrap align-items-center section-title">
-          <h2 class="mb-0 text-nowrap mr-3">Our Projects</h2>
-          <div class="border-top flex-grow-1 border-primary"></div>
-        </div>
-      </div>
+<div class="row">
+  <div class="col-12">
+    <div class="d-flex flex-wrap align-items-center section-title">
+
+      <h2 class="mb-0 text-nowrap mr-3">Our Projects</h2>
+
+      <div class="border-top flex-grow-1 border-primary"></div>
+
+      <a href="{{ url_for('main.all_projects_view') }}"
+         class="see-more text-primary small ml-auto">
+        See more
+      </a>
+
     </div>
+  </div>
+</div>
+
 
     <!-- SEARCH + COUNTER -->
     <div class="row mb-4 align-items-center">
@@ -17,6 +26,7 @@
       <div class="col-md-6 mb-2">
         <input type="text" id="projectSearch" class="form-control"
                placeholder="Search projects...">
+      
       </div>
 
       <div class="col-md-6 text-md-right">

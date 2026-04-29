@@ -1,92 +1,116 @@
-<section class="ftco-section testimony-section bg-primary">
-		<div class="container">
-			<div class="row justify-content-center pb-5">
-				<div class="col-md-12 heading-section heading-section-white text-center ftco-animate">
-					<span class="subheading">Testimonies</span>
-					<h2 class="mb-4">What client says about?</h2>
-					<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia</p>
-				</div>
+<section class="ftco-section testimony-section bg-primary" id="testimony-section">
+	<div class="container">
+
+		<div class="row justify-content-center pb-5">
+			<div class="col-md-12 heading-section heading-section-white text-center ftco-animate">
+				<span class="subheading">Testimonies</span>
+				<h2 class="mb-4">What client says about?</h2>
+				<p>Real feedback from our users</p>
 			</div>
-			<div class="row ftco-animate">
-				<div class="col-md-12">
-					<div class="carousel-testimony owl-carousel">
-						<div class="item">
-							<div class="testimony-wrap py-4">
-								<div class="text">
+		</div>
+
+		<div class="row ftco-animate">
+			<div class="col-md-12">
+				<div class="carousel-testimony owl-carousel">
+
+					{% for contact in contacts %}
+					<div class="item">
+						<div class="testimony-wrap py-4">
+							<div class="text d-flex flex-column justify-content-between">
+
+								<div>
 									<span class="fa fa-quote-left"></span>
-									<p class="mb-4 pl-5">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-									<div class="d-flex align-items-center">
-										<div class="user-img" style="background-image: url(images/person_1.jpg)"></div>
-										<div class="pl-3">
-											<p class="name">Roger Scott</p>
-											<span class="position">Marketing Manager</span>
-										</div>
-									</div>
+
+									<p class="mb-4 pl-5 message">
+										{{ contact.message }}
+									</p>
 								</div>
-							</div>
-						</div>
-						<div class="item">
-							<div class="testimony-wrap py-4">
-								<div class="text">
-									<span class="fa fa-quote-left"></span>
-									<p class="mb-4 pl-5">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-									<div class="d-flex align-items-center">
-										<div class="user-img" style="background-image: url(images/person_2.jpg)"></div>
-										<div class="pl-3">
-											<p class="name">Roger Scott</p>
-											<span class="position">Marketing Manager</span>
+
+								<div class="d-flex align-items-center mt-auto">
+
+									{% if contact.image %}
+										<div class="user-img"
+											style="background-image: url({{ url_for('static', filename=contact.image) }})">
 										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="item">
-							<div class="testimony-wrap py-4">
-								<div class="text">
-									<span class="fa fa-quote-left"></span>
-									<p class="mb-4 pl-5">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-									<div class="d-flex align-items-center">
-										<div class="user-img" style="background-image: url(images/person_3.jpg)"></div>
-										<div class="pl-3">
-											<p class="name">Roger Scott</p>
-											<span class="position">Marketing Manager</span>
+									{% else %}
+										<div class="user-img text-white"
+											style="background-color: {{ contact.color }};">
+											<span class="initial">
+												{{ contact.initial }}
+											</span>
 										</div>
+									{% endif %}
+
+									<div class="pl-3 user-info">
+										<p class="name">{{ contact.name }}</p>
+										<span class="position">{{ contact.email }}</span>
 									</div>
+
 								</div>
-							</div>
-						</div>
-						<div class="item">
-							<div class="testimony-wrap py-4">
-								<div class="text">
-									<span class="fa fa-quote-left"></span>
-									<p class="mb-4 pl-5">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-									<div class="d-flex align-items-center">
-										<div class="user-img" style="background-image: url(images/person_1.jpg)"></div>
-										<div class="pl-3">
-											<p class="name">Roger Scott</p>
-											<span class="position">Marketing Manager</span>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="item">
-							<div class="testimony-wrap py-4">
-								<div class="text">
-									<span class="fa fa-quote-left"></span>
-									<p class="mb-4 pl-5">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-									<div class="d-flex align-items-center">
-										<div class="user-img" style="background-image: url(images/person_2.jpg)"></div>
-										<div class="pl-3">
-											<p class="name">Roger Scott</p>
-											<span class="position">Marketing Manager</span>
-										</div>
-									</div>
-								</div>
+
 							</div>
 						</div>
 					</div>
+					{% endfor %}
+
 				</div>
 			</div>
 		</div>
-	</section>
+
+	</div>
+</section>
+
+<style>
+.testimony-wrap {
+	min-height: 280px;
+	display: flex;
+}
+
+.text {
+	width: 100%;
+}
+
+.message {
+	display: -webkit-box;
+	-webkit-line-clamp: 4;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+/* 🔥 USER IMAGE */
+.user-img {
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: bold;
+	font-size: 20px;
+	flex-shrink: 0;
+}
+
+/* 🔥 NAME + EMAIL FIX */
+.user-info {
+	max-width: 180px; /* xadid width */
+}
+
+.name,
+.position {
+	display: block;
+	word-break: break-word;     /* 🔥 jabin erayga */
+	overflow-wrap: break-word;  /* 🔥 wrap */
+	white-space: normal;        /* 🔥 allow multi-line */
+}
+
+/* optional: qurxin */
+.name {
+	font-weight: 600;
+	font-size: 16px;
+}
+
+.position {
+	font-size: 13px;
+	color: #888;
+}
+</style>

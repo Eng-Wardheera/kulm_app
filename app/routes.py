@@ -1,6 +1,9 @@
 import datetime
+import math
 import os
+import random
 import secrets
+import traceback
 import uuid
 
 from bson import ObjectId
@@ -12,7 +15,7 @@ from app import ALLOWED_EXTENSIONS
 from app.extensions import mongo
 from datetime import datetime
 
-from app.modal import Project, User, UserRole
+from app.modal import Contact, Project, User, UserRole
 
 
 bp = Blueprint('main', __name__)
@@ -51,17 +54,55 @@ def index():
     contact_count = mongo.db.contact.count_documents({})
     visits_count = mongo.db.sessions.count_documents({})
 
-    cursor = mongo.db.projects.find().sort("created_at", -1)
-    projects = [Project(data) for data in cursor]
+    # Projects
+    project_cursor = mongo.db.projects.find().sort("created_at", -1).limit(6)
+    projects = [Project(data) for data in project_cursor]
+
+    # Contacts
+    colors = [
+        "#FF6B6B", "#6BCB77", "#4D96FF", "#FFD93D",
+        "#845EC2", "#FF9671", "#00C9A7", "#C34A36"
+    ]
+
+    contact_cursor = mongo.db.contact.find().sort("created_at", -1).limit(10)
+    contacts = []
+
+    for data in contact_cursor:
+        contact = Contact(data)
+
+        user = None
+        photo = None
+
+        if contact.user_id:
+            user_data = mongo.db.users.find_one({"_id": ObjectId(contact.user_id)})
+            if user_data:
+                user = User(user_data)
+                photo = user.photo
+
+        if photo:
+            contact.image = photo
+            contact.initial = None
+            contact.color = None
+        else:
+            contact.image = None
+            contact.initial = (contact.name or "?")[0].upper()
+
+            # 🎨 random color
+            contact.color = random.choice(colors)
+
+        contacts.append(contact)
+
 
     return render_template(
         "frontend/home/index.html",
         projects=projects,
+        contacts=contacts,   # ✅ MUHIIM
         project_count=project_count,
         user_count=user_count,
         contact_count=contact_count,
         visits_count=visits_count
     )
+
 
 
 
@@ -97,6 +138,55 @@ def contact_submit():
 
     return redirect(url_for('main.index') + "#contact-section")
 
+
+@bp.route('/projects/view')
+def all_projects_view():
+    try:
+        # ================= PAGINATION =================
+        page = request.args.get('page', 1, type=int)
+        per_page = 6
+        skip = (page - 1) * per_page
+
+        # ================= TOTAL COUNT =================
+        total_projects = mongo.db.projects.count_documents({})
+
+        # ================= DATA FETCH =================
+        cursor = (
+            mongo.db.projects
+            .find()
+            .sort([("created_at", -1)])
+            .skip(skip)
+            .limit(per_page)
+        )
+
+        projects = []
+        for p in cursor:
+            try:
+                projects.append(Project(p))
+            except Exception as pe:
+                print("❌ PROJECT PARSE ERROR:", pe)
+                print(p)
+
+        # ================= TOTAL PAGES =================
+        total_pages = math.ceil(total_projects / per_page) if total_projects else 1
+
+        return render_template(
+            'frontend/pages/projects/all_projects.html',
+            projects=projects,
+            page=page,
+            total_pages=total_pages
+        )
+
+    except Exception as e:
+        # 🔥 THIS IS THE REAL FIX (show actual error)
+        print("❌ ROUTE ERROR (all_projects_view):")
+        print(str(e))
+        traceback.print_exc()
+
+        flash("Khalad ayaa dhacay marka projects la soo qaadayay.", "danger")
+        return redirect(url_for('main.index'))
+    
+    
 
 
 @bp.route('/project/<project_id>')
@@ -320,6 +410,9 @@ def edit_user(user_id):
 
     if request.method == 'POST':
 
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
         updated_data = {
             "fullname": request.form.get('fullname'),
             "username": request.form.get('username'),
@@ -327,12 +420,19 @@ def edit_user(user_id):
             "role": request.form.get('role'),
             "country": request.form.get('country'),
             "phone": request.form.get('phone'),
-            "password": request.form.get('password'),
             "address": request.form.get('address'),
             "bio": request.form.get('bio'),
             "status": True if request.form.get('status') == '1' else False,
             "updated_at": datetime.utcnow()
         }
+
+        # ================= PASSWORD FIX =================
+        if password:
+            if password != confirm_password:
+                flash("Passwords-ka isma laha!", "danger")
+                return redirect(url_for('main.edit_user', user_id=user_id))
+
+            updated_data["password"] = generate_password_hash(password)
 
         file = request.files.get('photo')
 
@@ -387,6 +487,7 @@ def edit_user(user_id):
         "backend/pages/components/users/edit_user.html",
         user=user
     )
+
 
 
 @bp.route('/delete-user/<user_id>', methods=['POST'])

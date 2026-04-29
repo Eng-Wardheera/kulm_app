@@ -1,0 +1,128 @@
+{% extends 'frontend/home/base.html' %}
+
+{% block title %}All Projects - Kulmiye TechW{% endblock %}
+
+{% block content %}
+
+<!-- ================= HERO ================= -->
+<section class="hero-wrap hero-wrap-2"
+         style="background-image: url('{{ url_for('static', filename='frontend/images/image.png') }}');">
+
+  <div class="overlay"></div>
+
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-end justify-content-center">
+      <div class="col-md-9 text-center pb-5">
+
+        <h1 class="mb-0 bread">All Projects</h1>
+
+        <p class="breadcrumbs">
+          <span><a href="{{ url_for('main.index') }}">Home</a></span>
+          <span>Projects</span>
+        </p>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROJECTS GRID ================= -->
+<section class="ftco-section">
+  <div class="container">
+
+    <div class="row">
+
+      {% if projects and projects|length > 0 %}
+
+        {% for project in projects %}
+        <div class="col-md-4 d-flex mb-4 ftco-animate">
+
+          <div class="card shadow-sm w-100 border-0">
+
+            <!-- IMAGE -->
+            <a href="{{ url_for('main.single_project', project_id=project.id) }}">
+              <img src="{{ url_for('static', filename=project.thumbnail) }}"
+                   class="card-img-top"
+                   style="height:220px; object-fit:cover;">
+            </a>
+
+            <!-- BODY -->
+            <div class="card-body">
+
+              <h5 class="card-title">
+                {{ project.title }}
+              </h5>
+
+              <p class="card-text">
+                {{ (project.description or '')[:100] }}...
+              </p>
+
+              <a href="{{ url_for('main.single_project', project_id=project.id) }}"
+                 class="btn btn-primary btn-sm">
+                View Details
+              </a>
+
+            </div>
+
+          </div>
+
+        </div>
+        {% endfor %}
+
+      {% else %}
+
+        <!-- EMPTY STATE -->
+        <div class="col-12 text-center mt-5">
+          <h4>No projects found</h4>
+          <p class="text-muted">Please check back later.</p>
+        </div>
+
+      {% endif %}
+
+    </div>
+
+    <!-- ================= PAGINATION ================= -->
+    {% if total_pages > 1 %}
+    <div class="row mt-4">
+      <div class="col-12 text-center">
+
+        <nav>
+          <ul class="pagination justify-content-center">
+
+            <!-- PREVIOUS -->
+            <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+              <a class="page-link"
+                 href="{{ url_for('main.all_projects_view', page=page-1) }}">
+                Prev
+              </a>
+            </li>
+
+            <!-- PAGES -->
+            {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+              <a class="page-link"
+                 href="{{ url_for('main.all_projects_view', page=p) }}">
+                {{ p }}
+              </a>
+            </li>
+            {% endfor %}
+
+            <!-- NEXT -->
+            <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+              <a class="page-link"
+                 href="{{ url_for('main.all_projects_view', page=page+1) }}">
+                Next
+              </a>
+            </li>
+
+          </ul>
+        </nav>
+
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+{% endblock %}
