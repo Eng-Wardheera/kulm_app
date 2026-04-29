@@ -174,18 +174,18 @@ def all_projects_view():
             'frontend/pages/projects/all_projects.html',
             projects=projects,
             page=page,
-            total_pages=total_pages
+            total_pages=total_pages,
+            total_projects=total_projects   # ✅ IMPORTANT FIX
         )
 
     except Exception as e:
-        # 🔥 THIS IS THE REAL FIX (show actual error)
         print("❌ ROUTE ERROR (all_projects_view):")
         print(str(e))
         traceback.print_exc()
 
         flash("Khalad ayaa dhacay marka projects la soo qaadayay.", "danger")
         return redirect(url_for('main.index'))
-    
+
     
 
 

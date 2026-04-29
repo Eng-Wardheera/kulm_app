@@ -42,7 +42,7 @@
       <!-- COUNTER -->
       <div class="col-md-6 text-md-right mt-2 mt-md-0">
         <strong id="totalFound">{{ projects|length }}</strong>
-        <span> / {{ projects|length }} Projects Found</span>
+        <span> / {{ total_projects }} Projects Found</span>
       </div>
 
     </div>
@@ -73,9 +73,7 @@
             <!-- BODY -->
             <div class="card-body">
 
-              <h5 class="card-title">
-                {{ project.title }}
-              </h5>
+              <h5 class="card-title">{{ project.title }}</h5>
 
               <p class="card-text">
                 {{ (project.description or '')[:100] }}...
@@ -102,7 +100,7 @@
 
       {% endif %}
 
-      <!-- NO RESULTS (SEARCH) -->
+      <!-- NO RESULTS -->
       <div class="col-12 text-center mt-4" id="noResults" style="display:none;">
         <h5>No matching projects found</h5>
       </div>
@@ -117,23 +115,26 @@
         <nav>
           <ul class="pagination justify-content-center">
 
+            <!-- PREV -->
             <li class="page-item {% if page <= 1 %}disabled{% endif %}">
               <a class="page-link" href="{{ url_for('main.all_projects_view', page=page-1) }}">
                 Prev
               </a>
             </li>
 
-            {% if page > 2 %}
+            <!-- FIRST -->
+            {% if page > 3 %}
             <li class="page-item">
               <a class="page-link" href="{{ url_for('main.all_projects_view', page=1) }}">1</a>
             </li>
-
-            {% if page > 3 %}
-              <li class="page-item disabled"><span class="page-link">...</span></li>
-            {% endif %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
             {% endif %}
 
-            {% for p in range(page-1, page+2) %}
+            <!-- MIDDLE -->
+            {% set start = page - 2 %}
+            {% set end = page + 2 %}
+
+            {% for p in range(start, end + 1) %}
               {% if p > 0 and p <= total_pages %}
               <li class="page-item {% if p == page %}active{% endif %}">
                 <a class="page-link" href="{{ url_for('main.all_projects_view', page=p) }}">
@@ -143,10 +144,9 @@
               {% endif %}
             {% endfor %}
 
-            {% if page < total_pages - 1 %}
-              {% if page < total_pages - 2 %}
-                <li class="page-item disabled"><span class="page-link">...</span></li>
-              {% endif %}
+            <!-- LAST -->
+            {% if page < total_pages - 2 %}
+              <li class="page-item disabled"><span class="page-link">...</span></li>
               <li class="page-item">
                 <a class="page-link" href="{{ url_for('main.all_projects_view', page=total_pages) }}">
                   {{ total_pages }}
@@ -154,6 +154,7 @@
               </li>
             {% endif %}
 
+            <!-- NEXT -->
             <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
               <a class="page-link" href="{{ url_for('main.all_projects_view', page=page+1) }}">
                 Next
@@ -173,31 +174,36 @@
 <!-- ================= LIVE SEARCH JS ================= -->
 <script>
 
-document.getElementById("projectSearch").addEventListener("keyup", function () {
+document.addEventListener("DOMContentLoaded", function () {
 
-    let value = this.value.toLowerCase().trim();
-    let items = document.querySelectorAll(".project-item");
+    const searchInput = document.getElementById("projectSearch");
+    const items = document.querySelectorAll(".project-item");
+    const totalFound = document.getElementById("totalFound");
+    const noResults = document.getElementById("noResults");
 
-    let visibleCount = 0;
+    searchInput.addEventListener("keyup", function () {
 
-    items.forEach(item => {
+        let value = this.value.toLowerCase().trim();
+        let visibleCount = 0;
 
-        let text = item.innerText.toLowerCase();
+        items.forEach(item => {
 
-        if (text.includes(value)) {
-            item.style.display = "";   // ✅ FIX (important)
-            visibleCount++;
-        } else {
-            item.style.display = "none";
-        }
+            let text = item.innerText.toLowerCase();
+
+            if (text.includes(value)) {
+                item.style.display = "";
+                visibleCount++;
+            } else {
+                item.style.display = "none";
+            }
+
+        });
+
+        totalFound.innerText = visibleCount;
+
+        noResults.style.display = visibleCount === 0 ? "block" : "none";
     });
 
-    // update counter
-    document.getElementById("totalFound").innerText = visibleCount;
-
-    // show no results
-    document.getElementById("noResults").style.display =
-        visibleCount === 0 ? "block" : "none";
 });
 
 </script>
