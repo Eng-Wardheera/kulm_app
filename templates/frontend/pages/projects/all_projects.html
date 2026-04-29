@@ -26,16 +26,40 @@
   </div>
 </section>
 
+<!-- ================= SEARCH + COUNTER ================= -->
+<section class="ftco-section py-3">
+  <div class="container">
+
+    <div class="row mb-3 align-items-center">
+
+      <!-- SEARCH -->
+      <div class="col-md-6">
+        <input type="text" id="projectSearch"
+               class="form-control"
+               placeholder="Search projects...">
+      </div>
+
+      <!-- COUNTER -->
+      <div class="col-md-6 text-md-right mt-2 mt-md-0">
+        <strong id="totalFound">{{ projects|length }}</strong>
+        <span> / {{ projects|length }} Projects Found</span>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
 <!-- ================= PROJECTS GRID ================= -->
 <section class="ftco-section">
   <div class="container">
 
-    <div class="row">
+    <div class="row" id="projectList">
 
       {% if projects and projects|length > 0 %}
 
         {% for project in projects %}
-        <div class="col-md-4 d-flex mb-4 ftco-animate">
+        <div class="col-md-4 mb-4 ftco-animate project-item">
 
           <div class="card shadow-sm w-100 border-0">
 
@@ -71,13 +95,17 @@
 
       {% else %}
 
-        <!-- EMPTY STATE -->
         <div class="col-12 text-center mt-5">
           <h4>No projects found</h4>
           <p class="text-muted">Please check back later.</p>
         </div>
 
       {% endif %}
+
+      <!-- NO RESULTS (SEARCH) -->
+      <div class="col-12 text-center mt-4" id="noResults" style="display:none;">
+        <h5>No matching projects found</h5>
+      </div>
 
     </div>
 
@@ -89,28 +117,45 @@
         <nav>
           <ul class="pagination justify-content-center">
 
-            <!-- PREVIOUS -->
             <li class="page-item {% if page <= 1 %}disabled{% endif %}">
-              <a class="page-link"
-                 href="{{ url_for('main.all_projects_view', page=page-1) }}">
+              <a class="page-link" href="{{ url_for('main.all_projects_view', page=page-1) }}">
                 Prev
               </a>
             </li>
 
-            <!-- PAGES -->
-            {% for p in range(1, total_pages + 1) %}
-            <li class="page-item {% if p == page %}active{% endif %}">
-              <a class="page-link"
-                 href="{{ url_for('main.all_projects_view', page=p) }}">
-                {{ p }}
-              </a>
+            {% if page > 2 %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('main.all_projects_view', page=1) }}">1</a>
             </li>
+
+            {% if page > 3 %}
+              <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+            {% endif %}
+
+            {% for p in range(page-1, page+2) %}
+              {% if p > 0 and p <= total_pages %}
+              <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('main.all_projects_view', page=p) }}">
+                  {{ p }}
+                </a>
+              </li>
+              {% endif %}
             {% endfor %}
 
-            <!-- NEXT -->
+            {% if page < total_pages - 1 %}
+              {% if page < total_pages - 2 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+              {% endif %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('main.all_projects_view', page=total_pages) }}">
+                  {{ total_pages }}
+                </a>
+              </li>
+            {% endif %}
+
             <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
-              <a class="page-link"
-                 href="{{ url_for('main.all_projects_view', page=page+1) }}">
+              <a class="page-link" href="{{ url_for('main.all_projects_view', page=page+1) }}">
                 Next
               </a>
             </li>
@@ -124,5 +169,37 @@
 
   </div>
 </section>
+
+<!-- ================= LIVE SEARCH JS ================= -->
+<script>
+
+document.getElementById("projectSearch").addEventListener("keyup", function () {
+
+    let value = this.value.toLowerCase().trim();
+    let items = document.querySelectorAll(".project-item");
+
+    let visibleCount = 0;
+
+    items.forEach(item => {
+
+        let text = item.innerText.toLowerCase();
+
+        if (text.includes(value)) {
+            item.style.display = "";   // ✅ FIX (important)
+            visibleCount++;
+        } else {
+            item.style.display = "none";
+        }
+    });
+
+    // update counter
+    document.getElementById("totalFound").innerText = visibleCount;
+
+    // show no results
+    document.getElementById("noResults").style.display =
+        visibleCount === 0 ? "block" : "none";
+});
+
+</script>
 
 {% endblock %}
