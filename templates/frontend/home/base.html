@@ -5,19 +5,26 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
+    <!-- FONTS -->
     <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+
+    <!-- ICONS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
+    <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='frontend/css/animate.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='frontend/css/owl.carousel.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='frontend/css/owl.theme.default.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='frontend/css/magnific-popup.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='frontend/css/flaticon.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='frontend/css/style.css') }}">
-    
-   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3390879578114456"
-     crossorigin="anonymous"></script>
-     
+
+    <!-- ✅ GOOGLE ADSENSE (ONLY ONCE) -->
+    <script async 
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3390879578114456"
+        crossorigin="anonymous">
+    </script>
+
 </head>
 
 <body data-spy="scroll" data-target=".site-navbar-target" data-offset="300">
@@ -29,6 +36,7 @@
     {% include "frontend/partials/footer.html" %}
     {% include "frontend/partials/loader.html" %}
 
+    <!-- JS -->
     <script src="{{ url_for('static', filename='frontend/js/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='frontend/js/jquery-migrate-3.0.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='frontend/js/popper.min.js') }}"></script>
@@ -40,45 +48,45 @@
     <script src="{{ url_for('static', filename='frontend/js/jquery.magnific-popup.min.js') }}"></script>
     <script src="{{ url_for('static', filename='frontend/js/jquery.animateNumber.min.js') }}"></script>
     <script src="{{ url_for('static', filename='frontend/js/scrollax.min.js') }}"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&sensor=false"></script>
+
+    <!-- ✅ FIXED GOOGLE MAPS -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY">
+    </script>
+
     <script src="{{ url_for('static', filename='frontend/js/google-map.js') }}"></script>
     <script src="{{ url_for('static', filename='frontend/js/main.js') }}"></script>
 
-   
-     
-	   <!-- SweetAlert2 CDN -->
+    <!-- SWEETALERT -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- Flash message handling with SweetAlert2 -->
-<script>
-   // Flash message handling with SweetAlert2
-   const flashMessages = {{ get_flashed_messages(with_categories=True) | tojson | safe }};
-   
-   if (flashMessages.length > 0) {
-       const [category, message] = flashMessages[0];
-   
-       const Toast = Swal.mixin({
-           toast: true,
-           position: 'top-end',
-           showConfirmButton: false,
-           timer: 3000,
-           timerProgressBar: true,
-           background: '#fff',
-           color: '#333',
-           didOpen: (toast) => {
-               toast.addEventListener('mouseenter', Swal.stopTimer)
-               toast.addEventListener('mouseleave', Swal.resumeTimer)
-           }
-       });
-   
-       Toast.fire({
-           icon: category === "success" ? "success" : "info",
-           title: message
-       });
-   }
-</script>
+    <!-- FLASH -->
+    <script>
+        const flashMessages = {{ get_flashed_messages(with_categories=True) | tojson | safe }};
+        
+        if (flashMessages.length > 0) {
+            const [category, message] = flashMessages[0];
 
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                background: '#fff',
+                color: '#333',
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
 
+            Toast.fire({
+                icon: category === "success" ? "success" : "info",
+                title: message
+            });
+        }
+    </script>
 
 </body>
 </html>
