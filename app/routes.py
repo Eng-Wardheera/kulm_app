@@ -266,6 +266,13 @@ def single_project(project_id):
         return redirect(url_for('main.index'))
 
 
+@bp.route('/privacy-policy')
+def privacy_policy():
+    return render_template('frontend/pages/privacy_policy.html')
+
+
+
+
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:

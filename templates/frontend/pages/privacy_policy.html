@@ -1,0 +1,100 @@
+{% extends 'frontend/home/base.html' %}
+
+{% block title %}Privacy Policy - Kulmiye TechW{% endblock %}
+
+{% block content %}
+
+<section class="hero-wrap hero-wrap-2"
+         style="background-image: url('{{ url_for('static', filename='frontend/images/image.png') }}');">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text align-items-end justify-content-center">
+      <div class="col-md-9 text-center pb-5">
+        <h1 class="mb-0 bread">Privacy Policy</h1>
+        <p class="breadcrumbs">
+          <span><a href="{{ url_for('main.index') }}">Home</a></span>
+          <span>Privacy Policy</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ftco-section">
+  <div class="container">
+
+    <h3>Privacy Policy</h3>
+    <p>Last updated: {{ current_year }}</p>
+
+    <p>
+      At <strong>Kulmiye TechW</strong>, we value your privacy. This Privacy Policy explains
+      how we collect, use, and protect your information when you visit our website.
+    </p>
+
+    <h4>1. Information We Collect</h4>
+    <p>We may collect the following types of information:</p>
+    <ul>
+      <li>Personal information (name, email) when you contact us</li>
+      <li>Usage data (pages visited, time spent)</li>
+      <li>Device and browser information</li>
+    </ul>
+
+    <h4>2. How We Use Your Information</h4>
+    <p>We use your information to:</p>
+    <ul>
+      <li>Improve our website and services</li>
+      <li>Respond to your messages</li>
+      <li>Analyze traffic and usage</li>
+    </ul>
+
+    <h4>3. Cookies</h4>
+    <p>
+      We use cookies to enhance your experience. Cookies help us understand how users interact
+      with our website.
+    </p>
+
+    <h4>4. Third-Party Services</h4>
+    <p>
+      We may use third-party services such as Google Analytics and Google AdSense to
+      analyze traffic and display ads. These services may use cookies and similar technologies.
+    </p>
+
+    <h4>5. Google AdSense</h4>
+    <p>
+      We may display ads served by Google AdSense. Google uses cookies to serve ads based on
+      your visits to this and other websites.
+    </p>
+    <p>
+      You can opt out of personalized advertising by visiting:
+      <a href="https://www.google.com/settings/ads" target="_blank">
+        Google Ads Settings
+      </a>
+    </p>
+
+    <h4>6. Data Protection</h4>
+    <p>
+      We take reasonable steps to protect your data, but no method of transmission over the
+      internet is 100% secure.
+    </p>
+
+    <h4>7. Your Rights</h4>
+    <p>
+      You have the right to request access, correction, or deletion of your personal data.
+    </p>
+
+    <h4>8. Changes to This Policy</h4>
+    <p>
+      We may update this Privacy Policy from time to time. Changes will be posted on this page.
+    </p>
+
+    <h4>9. Contact Us</h4>
+    <p>
+      If you have any questions, contact us at:
+      <br>
+      <strong>Email:</strong> your@email.com
+    </p>
+
+  </div>
+</section>
+
+{% endblock %}

@@ -152,6 +152,9 @@ def create_app():
 
     # Register blueprints
    
+    @app.context_processor
+    def inject_year():
+        return dict(current_year=datetime.now().year)
 
     # 27 Filter: Format datetime for input[type="datetime-local"]
     @app.template_filter('datetimeformat_input')
