@@ -185,35 +185,22 @@ class Contact:
     def __init__(self, data):
         self.data = data or {}
 
-        # Identifiers
         self.id = str(self.data.get("_id"))
         self.user_id = str(self.data.get("user_id")) if self.data.get("user_id") else None
 
-        # Content
         self.name = self.data.get("name")
         self.email = self.data.get("email")
         self.subject = self.data.get("subject")
         self.message = self.data.get("message")
 
-        # System Fields
-        self.status = self.data.get("status", "pending") # pending, read, replied
-        self.created_at = self.data.get("created_at") or datetime.utcnow()
+        # ⭐ NEW
+        self.rating = int(self.data.get("rating", 5))  # default 5 stars
+
+        self.status = self.data.get("status", "pending")
+        self.created_at = self.data.get("created_at")
         self.updated_at = self.data.get("updated_at")
 
-    def to_dict(self):
-        """U beddel xogta qaab dictionary ah si loogu kaydiyo MongoDB."""
-        return {
-            "name": self.name,
-            "email": self.email,
-            "subject": self.subject,
-            "message": self.message,
-            "status": self.status,
-            "created_at": self.created_at,
-            "user_id": self.user_id
-        }
 
-    def __repr__(self):
-        return f"<Contact {self.subject} from {self.name}>"
 
 class Session:
     def __init__(self, data):

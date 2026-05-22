@@ -138,6 +138,23 @@ def index():
         visits_data=visits_data
     )
 
+@bp.route('/testimonial', methods=['POST'])
+def create_testimonial():
+    name = request.form.get("name")
+    email = request.form.get("email")
+    message = request.form.get("message")
+    rating = int(request.form.get("rating", 5))
+
+    mongo.db.contact.insert_one({
+        "name": name,
+        "email": email,
+        "message": message,
+        "rating": rating,
+        "status": "pending",  # 🔥 muhiim
+        "created_at": datetime.utcnow()
+    })
+
+    return redirect(url_for('bp.index'))
 
 
 
@@ -150,6 +167,9 @@ def contact_submit():
     subject = request.form.get('subject')
     message = request.form.get('message')
 
+    # ⭐ NEW
+    rating = int(request.form.get('rating', 5))
+
     if not all([name, email, subject, message]):
         flash("Fadlan buuxi dhammaan meelaha bannaan!", "danger")
         return redirect(url_for('main.index') + "#contact-section")
@@ -160,6 +180,7 @@ def contact_submit():
         "email": email,
         "subject": subject,
         "message": message,
+        "rating": rating,  # ⭐ muhiim
         "status": "pending",
         "created_at": datetime.utcnow()
     }
