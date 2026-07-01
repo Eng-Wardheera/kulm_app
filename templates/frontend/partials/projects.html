@@ -1,32 +1,42 @@
+{% macro img(url) %}
+    {% if url %}
+        {% if url.startswith('http') %}
+            {{ url }}
+        {% else %}
+            {{ url_for('static', filename=url) }}
+        {% endif %}
+    {% else %}
+        {{ url_for('static', filename='frontend/images/default.png') }}
+    {% endif %}
+{% endmacro %}
+
 <section class="ftco-section bg-light" id="projects-section">
   <div class="container">
 
-    <!-- TITLE -->
-<div class="row">
-  <div class="col-12">
-    <div class="d-flex flex-wrap align-items-center section-title">
+    <!-- ================= TITLE ================= -->
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex flex-wrap align-items-center section-title">
 
-      <h2 class="mb-0 text-nowrap mr-3">Our Projects</h2>
+          <h2 class="mb-0 text-nowrap mr-3">Our Projects</h2>
 
-      <div class="border-top flex-grow-1 border-primary"></div>
+          <div class="border-top flex-grow-1 border-primary"></div>
 
-      <a href="{{ url_for('main.all_projects_view') }}"
-         class="see-more text-primary small ml-auto">
-        See more
-      </a>
+          <a href="{{ url_for('main.all_projects_view') }}"
+             class="see-more text-primary small ml-auto">
+            See more
+          </a>
 
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-
-    <!-- SEARCH + COUNTER -->
+    <!-- ================= SEARCH + COUNTER ================= -->
     <div class="row mb-4 align-items-center">
 
       <div class="col-md-6 mb-2">
         <input type="text" id="projectSearch" class="form-control"
                placeholder="Search projects...">
-      
       </div>
 
       <div class="col-md-6 text-md-right">
@@ -38,46 +48,58 @@
 
     </div>
 
-    <!-- PROJECT LIST -->
+    <!-- ================= PROJECT LIST ================= -->
     <div class="row justify-content-left" id="projectList">
 
       {% for project in projects %}
       <div class="col-lg-4 col-sm-6 mb-5 project-item">
 
-        <div class="card p-0 border-primary rounded-0 hover-shadow" style="cursor:pointer;">
+        <div class="card p-0 border-primary rounded-0 hover-shadow"
+             style="cursor:pointer;">
 
-          <div class="position-relative" onclick="openProjectModal(this)"
+          <!-- ================= IMAGE + CLICK ================= -->
+          <div class="position-relative"
+               onclick="openProjectModal(this)"
                data-title="{{ project.title }}"
                data-desc="{{ project.description }}"
                data-video="{{ project.video_path or '' }}"
                data-url="{{ project.video_url or '' }}">
 
             <img class="card-img-top rounded-0"
-                 src="{{ url_for('static', filename=project.thumbnail) }}"
+                 src="{{ img(project.thumbnail) }}"
                  height="230"
                  style="object-fit:cover;">
 
             <div class="play-overlay"
-                 style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">
+                 style="position:absolute;top:50%;left:50%;
+                        transform:translate(-50%,-50%);
+                        pointer-events:none;">
               <i class="fa fa-play-circle text-white"
-                 style="font-size:60px; opacity:0.8;"></i>
+                 style="font-size:60px;opacity:0.8;"></i>
             </div>
 
           </div>
 
+          <!-- ================= BODY ================= -->
           <div class="card-body">
 
             <ul class="list-inline mb-2">
               <li class="list-inline-item">
                 <i class="ti-calendar mr-1 text-color"></i>
-                {{ project.created_at.strftime('%m-%d-%Y') }}
+
+                {% if project.created_at %}
+                  {{ project.created_at.strftime('%m-%d-%Y') }}
+                {% else %}
+                  N/A
+                {% endif %}
+
               </li>
             </ul>
 
             <h4 class="card-title">{{ project.title }}</h4>
 
             <p class="card-text mb-4">
-              {{ project.description|truncate(50, True, '...') }}
+              {{ (project.description or '')[:50] }}{% if project.description and project.description|length > 50 %}...{% endif %}
             </p>
 
             <a href="{{ url_for('main.single_project', project_id=project.id) }}"
@@ -92,29 +114,25 @@
       {% endfor %}
 
     </div>
+
   </div>
 </section>
 
-
 <!-- ================= MODAL ================= -->
 <div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">
+
   <div class="modal-dialog modal-lg modal-dialog-centered">
+
     <div class="modal-content">
 
       <div class="modal-header border-0">
+
         <h5 class="modal-title" id="modalTitle">Project Title</h5>
 
-        <!-- CLOSE BUTTON -->
         <button type="button"
                 onclick="closeProjectModal()"
-                style="
-                  border:none;
-                  background:transparent;
-                  font-size:28px;
-                  font-weight:bold;
-                  color:#000;
-                  cursor:pointer;
-                ">
+                style="border:none;background:transparent;
+                       font-size:28px;font-weight:bold;cursor:pointer;">
           &times;
         </button>
 
@@ -129,9 +147,9 @@
       </div>
 
     </div>
+
   </div>
 </div>
-
 
 <!-- ================= JS ================= -->
 <script>
@@ -139,30 +157,31 @@
 let projectModalInstance = null;
 
 /* OPEN MODAL */
-function openProjectModal(element) {
+function openProjectModal(el) {
 
     const modalEl = document.getElementById('projectModal');
 
-    document.getElementById('modalTitle').innerText = element.getAttribute('data-title');
-    document.getElementById('modalDesc').innerText = element.getAttribute('data-desc');
+    document.getElementById('modalTitle').innerText = el.dataset.title || '';
+    document.getElementById('modalDesc').innerText = el.dataset.desc || '';
 
     const videoContainer = document.getElementById('videoContainer');
     videoContainer.innerHTML = '';
 
-    const videoPath = element.getAttribute('data-video');
-    const videoUrl = element.getAttribute('data-url');
+    const videoPath = el.dataset.video;
+    const videoUrl = el.dataset.url;
 
     /* LOCAL VIDEO */
-    if (videoPath && videoPath !== "None" && videoPath !== "") {
+    if (videoPath && videoPath !== "None") {
+
         videoContainer.innerHTML = `
-            <video id="modalVideo" width="100%" controls autoplay class="shadow rounded">
-                <source src="/static/${videoPath}" type="video/mp4">
+            <video width="100%" controls autoplay class="shadow rounded">
+                <source src="{{ url_for('static', filename='') }}${videoPath}" type="video/mp4">
             </video>
         `;
     }
 
-    /* YOUTUBE / URL */
-    else if (videoUrl && videoUrl !== "None" && videoUrl !== "") {
+    /* YOUTUBE / EXTERNAL */
+    else if (videoUrl && videoUrl !== "None") {
 
         let videoId = null;
 
@@ -178,8 +197,7 @@ function openProjectModal(element) {
             : videoUrl;
 
         videoContainer.innerHTML = `
-            <iframe id="modalFrame"
-                width="100%" height="400"
+            <iframe width="100%" height="400"
                 src="${embed}"
                 frameborder="0"
                 allow="autoplay; encrypted-media"
@@ -192,54 +210,37 @@ function openProjectModal(element) {
     projectModalInstance.show();
 }
 
-
-/* CLOSE MODAL (FULL FIX) */
+/* CLOSE MODAL */
 function closeProjectModal() {
 
     const modalEl = document.getElementById('projectModal');
 
-    if (projectModalInstance) {
-        projectModalInstance.hide();
-    } else {
-        bootstrap.Modal.getInstance(modalEl)?.hide();
-    }
+    projectModalInstance?.hide();
+    bootstrap.Modal.getInstance(modalEl)?.hide();
 
     clearVideo();
 }
 
-
-/* CLEAR VIDEO (STOP PLAYBACK) */
+/* CLEAR VIDEO */
 function clearVideo() {
-
-    const videoContainer = document.getElementById("videoContainer");
-
-    /* remove iframe completely */
-    videoContainer.innerHTML = '';
-
-    /* stop HTML5 video if exists */
-    const video = document.getElementById("modalVideo");
-    if (video) {
-        video.pause();
-        video.currentTime = 0;
-    }
+    document.getElementById("videoContainer").innerHTML = '';
 }
 
-
-/* AUTO CLEAR ON CLOSE */
+/* CLEAN ON CLOSE */
 document.getElementById('projectModal')
-.addEventListener('hidden.bs.modal', function () {
-    clearVideo();
-});
-
+.addEventListener('hidden.bs.modal', clearVideo);
 
 /* SEARCH */
 document.getElementById("projectSearch").addEventListener("keyup", function () {
-    let value = this.value.toLowerCase();
+
+    const value = this.value.toLowerCase();
 
     document.querySelectorAll(".project-item").forEach(item => {
-        item.style.display = item.innerText.toLowerCase().includes(value) ? "" : "none";
+        item.style.display =
+            item.innerText.toLowerCase().includes(value)
+            ? ""
+            : "none";
     });
 });
 
 </script>
-

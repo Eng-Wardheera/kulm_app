@@ -2,6 +2,8 @@ from datetime import datetime
 
 import os
 import traceback
+import cloudinary
+import cloudinary.uploader
 from flask import Flask, flash, redirect, render_template, url_for
 from flask_cors import CORS
 from flask_login import LoginManager, current_user
@@ -50,6 +52,13 @@ def now_eat():
 
 # Load environment variables from .env file
 load_dotenv()
+
+
+cloudinary.config(
+    cloud_name="dzhairplt",
+    api_key="597738172555213",
+    api_secret="x4UXHFVqzH4Oq_MeBV4VGYoZHns"
+)
 
 
 #-------------------------------------------------------------

@@ -2,8 +2,19 @@
 
 {% block title %}All Projects - Kulmiye TechW{% endblock %}
 
-{% block content %}
+{% macro get_image(url) %}
+    {% if url %}
+        {% if url.startswith('http') %}
+            {{ url }}
+        {% else %}
+            {{ url_for('static', filename=url) }}
+        {% endif %}
+    {% else %}
+        {{ url_for('static', filename='frontend/images/default.png') }}
+    {% endif %}
+{% endmacro %}
 
+{% block content %}
 
 <!-- ================= HERO ================= -->
 <section class="hero-wrap hero-wrap-2"
@@ -27,16 +38,6 @@
   </div>
 </section>
 
-<!-- ================= TOP AD ================= -->
-<!-- 
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-format="autorelaxed"
-     data-ad-client="ca-pub-3390879578114456"
-     data-ad-slot="4371098268"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script> -->
 <!-- ================= SEARCH + COUNTER ================= -->
 <section class="ftco-section py-3">
   <div class="container">
@@ -49,9 +50,10 @@
           <div class="input-group">
             <input type="text"
                    name="search"
-                   value="{{ search }}"
+                   value="{{ search or '' }}"
                    class="form-control"
                    placeholder="Search projects...">
+
             <div class="input-group-append">
               <button class="btn btn-primary" type="submit">
                 Search
@@ -84,26 +86,28 @@
 
         <div class="col-md-4 mb-4 ftco-animate">
 
-          <div class="card shadow-sm w-100 border-0">
+          <div class="card shadow-sm border-0 h-100 project-card">
 
             <a href="{{ url_for('main.single_project', project_id=project.id) }}">
-              <img src="{{ url_for('static', filename=project.thumbnail) }}"
+              <img src="{{ get_image(project.thumbnail) }}"
                    class="card-img-top"
                    style="height:220px; object-fit:cover;">
             </a>
 
-            <div class="card-body">
+            <div class="card-body d-flex flex-column">
 
               <h5 class="card-title">{{ project.title }}</h5>
 
-              <p class="card-text">
-                {{ (project.description or '')[:100] }}...
+              <p class="card-text text-muted">
+                {{ (project.description or '')[:100] }}{% if project.description and project.description|length > 100 %}...{% endif %}
               </p>
 
-              <a href="{{ url_for('main.single_project', project_id=project.id) }}"
-                 class="btn btn-primary btn-sm">
-                View Details
-              </a>
+              <div class="mt-auto">
+                <a href="{{ url_for('main.single_project', project_id=project.id) }}"
+                   class="btn btn-primary btn-sm w-100">
+                  View Details
+                </a>
+              </div>
 
             </div>
 
@@ -113,18 +117,7 @@
 
         <!-- ================= MID AD AFTER 3 ITEMS ================= -->
         {% if loop.index == 3 %}
-   
-<!-- <div style="min-width:300px; min-height:250px; margin:20px 0;">
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-format="auto"
-     data-ad-client="ca-pub-3390879578114456"
-     data-ad-slot="1529312507"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-</div> -->
-
+        <!-- ADS HERE (optional) -->
         {% endif %}
 
         {% endfor %}
@@ -148,7 +141,6 @@
         <nav>
           <ul class="pagination justify-content-center">
 
-            <!-- PREV -->
             <li class="page-item {% if page <= 1 %}disabled{% endif %}">
               <a class="page-link"
                  href="{{ url_for('main.all_projects_view', page=page-1, search=search) }}">
@@ -156,7 +148,6 @@
               </a>
             </li>
 
-            <!-- FIRST -->
             {% if page > 3 %}
             <li class="page-item">
               <a class="page-link"
@@ -165,7 +156,6 @@
             <li class="page-item disabled"><span class="page-link">...</span></li>
             {% endif %}
 
-            <!-- MIDDLE -->
             {% for p in range(page-2, page+3) %}
               {% if p > 0 and p <= total_pages %}
               <li class="page-item {% if p == page %}active{% endif %}">
@@ -177,7 +167,6 @@
               {% endif %}
             {% endfor %}
 
-            <!-- LAST -->
             {% if page < total_pages - 2 %}
               <li class="page-item disabled"><span class="page-link">...</span></li>
               <li class="page-item">
@@ -188,7 +177,6 @@
               </li>
             {% endif %}
 
-            <!-- NEXT -->
             <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
               <a class="page-link"
                  href="{{ url_for('main.all_projects_view', page=page+1, search=search) }}">
@@ -206,21 +194,14 @@
   </div>
 </section>
 
-<!-- ================= BOTTOM AD ================= -->
-
-<!-- <ins class="adsbygoogle"
-     style="display:block; text-align:center;"
-     data-ad-layout="in-article"
-     data-ad-format="fluid"
-     data-ad-client="ca-pub-3390879578114456"
-     data-ad-slot="6997261600"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script> -->
-
-<!-- ================= ADS SCRIPT ================= -->
-
-
-
+<style>
+.project-card {
+    transition: 0.3s ease;
+}
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+</style>
 
 {% endblock %}

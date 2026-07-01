@@ -8,6 +8,8 @@ import traceback
 import uuid
 
 from bson import ObjectId
+import cloudinary
+import cloudinary.uploader
 from flask import Blueprint, abort, current_app, flash, make_response, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -195,6 +197,19 @@ def contact_submit():
     return redirect(url_for('main.index') + "#contact-section")
 
 
+def resolve_image(img):
+    if not img:
+        return url_for('static', filename='images/default.png')
+
+    # Cloudinary / external
+    if img.startswith("http://") or img.startswith("https://"):
+        return img
+
+    # Local static
+    return url_for('static', filename=img)
+
+
+
 @bp.route('/projects/view')
 def all_projects_view():
     try:
@@ -229,9 +244,22 @@ def all_projects_view():
         )
 
         projects = []
+
         for p in cursor:
             try:
-                projects.append(Project(p))
+                project = Project(p)
+
+                # ================= IMAGE FIX =================
+                # single image
+                if hasattr(project, "image"):
+                    project.image = resolve_image(project.image)
+
+                # multiple images
+                if hasattr(project, "images") and project.images:
+                    project.images = [resolve_image(img) for img in project.images]
+
+                projects.append(project)
+
             except Exception as pe:
                 print("❌ PROJECT PARSE ERROR:", pe)
                 print(p)
@@ -246,7 +274,7 @@ def all_projects_view():
             page=page,
             total_pages=total_pages,
             total_projects=total_projects,
-            search=search   # 🔥 muhiim
+            search=search
         )
 
     except Exception as e:
@@ -256,21 +284,29 @@ def all_projects_view():
 
         flash("Khalad ayaa dhacay marka projects la soo qaadayay.", "danger")
         return redirect(url_for('main.index'))
-  
+    
+
 
 
 @bp.route('/project/<project_id>')
 def single_project(project_id):
     try:
-        # 1. Fetch project
+        # ================= FETCH PROJECT =================
         data = mongo.db.projects.find_one({"_id": ObjectId(project_id)})
         if not data:
             flash("Project-gan lama helin!", "danger")
             return redirect(url_for('main.index'))
-        
+
         project = Project(data)
-        
-        # 2. Fetch owner data (Halkan ayaan ka soo helaynaa user-ka)
+
+        # ================= IMAGE FIX =================
+        if hasattr(project, "image"):
+            project.image = resolve_image(project.image)
+
+        if hasattr(project, "images") and project.images:
+            project.images = [resolve_image(img) for img in project.images]
+
+        # ================= OWNER =================
         owner = None
         if project.user_id:
             try:
@@ -278,13 +314,19 @@ def single_project(project_id):
                 if owner_data:
                     owner = User(owner_data)
             except:
-                owner = None # Haddii ID-gu khaldan yahay
-        
-        return render_template("frontend/pages/projects/single_project.html", project=project, owner=owner)
-        
+                owner = None
+
+        return render_template(
+            "frontend/pages/projects/single_project.html",
+            project=project,
+            owner=owner
+        )
+
     except Exception as e:
         flash("Khalad ayaa dhacay.", "danger")
         return redirect(url_for('main.index'))
+    
+
 
 
 @bp.route('/privacy-policy')
@@ -626,71 +668,50 @@ def add_project():
 
     if request.method == 'POST':
 
-        # Base upload directory
-        base_dir = os.path.join("static", "backend", "uploads", "projects")
+        # =========================
+        # THUMBNAIL → CLOUDINARY
+        # =========================
+        thumb_file = request.files.get('thumbnail')
+
+        if thumb_file and thumb_file.filename != '':
+            thumb_upload = cloudinary.uploader.upload(
+                thumb_file,
+                folder="projects/thumbnails"
+            )
+            thumb_db_path = thumb_upload.get("secure_url")
+        else:
+            thumb_db_path = "https://res.cloudinary.com/demo/image/upload/no_image.png"
 
         # =========================
-        # THUMBNAIL UPLOAD
-        # =========================
-        thumb_db_path = "backend/uploads/projects/thumbnails/no_image.jpg"
-        image = request.files.get('thumbnail')
-
-        if image and image.filename != '':
-
-            ext = os.path.splitext(image.filename)[1]
-            unique_name = f"{uuid.uuid4().hex[:8]}{ext}"
-
-            save_folder = os.path.join(base_dir, 'thumbnails')
-            os.makedirs(save_folder, exist_ok=True)
-
-            image_path = os.path.join(save_folder, unique_name)
-            image.save(image_path)
-
-            thumb_db_path = f"backend/uploads/projects/thumbnails/{unique_name}"
-
-        # =========================
-        # GALLERY UPLOAD
+        # GALLERY → CLOUDINARY
         # =========================
         gallery_db_paths = []
         gallery_files = request.files.getlist('gallery')
 
-        if gallery_files:
-
-            save_gallery = os.path.join(base_dir, 'gallery')
-            os.makedirs(save_gallery, exist_ok=True)
-
-            for file in gallery_files:
-                if file and file.filename != '':
-
-                    unique_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(file.filename)}"
-                    file_path = os.path.join(save_gallery, unique_name)
-                    file.save(file_path)
-
-                    gallery_db_paths.append(
-                        f"backend/uploads/projects/gallery/{unique_name}"
-                    )
+        for file in gallery_files:
+            if file and file.filename != '':
+                upload_result = cloudinary.uploader.upload(
+                    file,
+                    folder="projects/gallery"
+                )
+                gallery_db_paths.append(upload_result.get("secure_url"))
 
         # =========================
-        # VIDEO UPLOAD (FILE)
+        # VIDEO FILE → CLOUDINARY
         # =========================
-        video_db_path = ""
-        video = request.files.get('video_file')
+        video_file = request.files.get('video_file')
+        video_db_url = ""
 
-        if video and video.filename != '':
-
-            ext = os.path.splitext(video.filename)[1]
-            unique_name = f"{uuid.uuid4().hex[:8]}{ext}"
-
-            save_video = os.path.join(base_dir, 'videos')
-            os.makedirs(save_video, exist_ok=True)
-
-            video_path = os.path.join(save_video, unique_name)
-            video.save(video_path)
-
-            video_db_path = f"backend/uploads/projects/videos/{unique_name}"
+        if video_file and video_file.filename != '':
+            video_upload = cloudinary.uploader.upload(
+                video_file,
+                resource_type="video",
+                folder="projects/videos"
+            )
+            video_db_url = video_upload.get("secure_url")
 
         # =========================
-        # VIDEO URL (YOUTUBE / EXTERNAL)
+        # VIDEO URL (YouTube / external)
         # =========================
         video_url = request.form.get('video_url', '').strip()
 
@@ -698,21 +719,18 @@ def add_project():
         # SAVE TO MONGODB
         # =========================
         new_project = {
-            "user_id": current_user.id,
+            "user_id": str(current_user.id),
             "title": request.form.get('title'),
             "description": request.form.get('description'),
 
+            # 🔥 CLOUDINARY MEDIA
             "thumbnail": thumb_db_path,
             "gallery": gallery_db_paths,
 
             "video": {
-                "url": video_url,
-                "path": video_db_path
+                "file_url": video_db_url,
+                "external_url": video_url
             },
-
-            # 🔥 optional fallback (extra safety)
-            "video_url": video_url,
-            "video_path": video_db_path,
 
             "social_links": {
                 "github": request.form.get('github'),
@@ -728,7 +746,7 @@ def add_project():
 
         mongo.db.projects.insert_one(new_project)
 
-        flash("Project-ga si guul leh ayaa loo kaydiyay!", "success")
+        flash("Project-ga si guul leh ayaa Cloudinary loogu kaydiyay!", "success")
 
         return redirect(url_for('main.add_project'))
 
@@ -736,6 +754,9 @@ def add_project():
         "backend/pages/components/projects/add_project.html"
     )
 
+
+def is_cloudinary(url):
+    return url and url.startswith("http")
 
 @bp.route('/edit-project/<project_id>', methods=['GET', 'POST'])
 @login_required
@@ -759,17 +780,20 @@ def edit_project(project_id):
     if request.method == 'POST':
 
         # =====================================================
-        # THUMBNAIL (REPLACE + DELETE OLD)
+        # THUMBNAIL (STATIC + CLOUDINARY SAFE)
         # =====================================================
         new_thumb_path = project.get('thumbnail')
         image = request.files.get('thumbnail')
 
         if image and image.filename:
 
-            if project.get('thumbnail') and 'no_image' not in project.get('thumbnail'):
-                old_thumb = os.path.join(os.getcwd(), project['thumbnail'])
-                if os.path.exists(old_thumb):
-                    os.remove(old_thumb)
+            old_thumb = project.get('thumbnail')
+
+            # ❌ delete ONLY if local file
+            if old_thumb and not is_cloudinary(old_thumb):
+                old_path = os.path.join(os.getcwd(), old_thumb)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
 
             ext = os.path.splitext(image.filename)[1]
             unique_name = f"{uuid.uuid4().hex[:10]}{ext}"
@@ -783,17 +807,18 @@ def edit_project(project_id):
             new_thumb_path = f"backend/uploads/projects/thumbnails/{unique_name}"
 
         # =====================================================
-        # GALLERY (REPLACE MODE + DELETE OLD)
+        # GALLERY (STATIC + CLOUDINARY SAFE)
         # =====================================================
         gallery_files = request.files.getlist('gallery')
 
         if gallery_files and gallery_files[0].filename:
 
-            # DELETE OLD GALLERY FILES
+            # DELETE OLD ONLY LOCAL FILES
             for old_img in project.get('gallery', []):
-                old_path = os.path.join(os.getcwd(), old_img)
-                if os.path.exists(old_path):
-                    os.remove(old_path)
+                if not is_cloudinary(old_img):
+                    old_path = os.path.join(os.getcwd(), old_img)
+                    if os.path.exists(old_path):
+                        os.remove(old_path)
 
             gallery_paths = []
 
@@ -814,23 +839,25 @@ def edit_project(project_id):
             gallery_paths = project.get('gallery', [])
 
         # =====================================================
-        # VIDEO (FILE OR URL SWITCH CLEAN)
+        # VIDEO (STATIC FILE OR CLOUDINARY OR URL)
         # =====================================================
         video_data = project.get('video', {"url": "", "path": ""})
 
         video_file = request.files.get('video_file')
-        video_url = request.form.get('video_url')
+        video_url = request.form.get('video_url', '').strip()
 
         # -------------------------
-        # IF FILE UPLOADED
+        # FILE UPLOAD
         # -------------------------
         if video_file and video_file.filename:
 
-            # delete old file
-            if video_data.get('path'):
-                old_video = os.path.join(os.getcwd(), video_data['path'])
-                if os.path.exists(old_video):
-                    os.remove(old_video)
+            old_video_path = video_data.get('path')
+
+            # ❌ delete ONLY local file
+            if old_video_path and not is_cloudinary(old_video_path):
+                old_path = os.path.join(os.getcwd(), old_video_path)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
 
             ext = os.path.splitext(video_file.filename)[1]
             unique_name = f"{uuid.uuid4().hex[:10]}{ext}"
@@ -847,13 +874,17 @@ def edit_project(project_id):
             }
 
         # -------------------------
-        # IF URL ONLY
+        # EXTERNAL VIDEO URL
         # -------------------------
         elif video_url:
-            if video_data.get('path'):
-                old_video = os.path.join(os.getcwd(), video_data['path'])
-                if os.path.exists(old_video):
-                    os.remove(old_video)
+
+            # ❌ only delete local file, keep cloudinary safe
+            old_video_path = video_data.get('path')
+
+            if old_video_path and not is_cloudinary(old_video_path):
+                old_path = os.path.join(os.getcwd(), old_video_path)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
 
             video_data = {
                 "path": "",
@@ -899,7 +930,6 @@ def edit_project(project_id):
     )
 
 
-
 @bp.route('/delete-project/<project_id>', methods=['POST'])
 @login_required
 def delete_project(project_id):
@@ -942,21 +972,78 @@ def delete_project(project_id):
     return redirect(url_for('main.all_projects'))
 
 
+def get_image_url(path):
+    if not path:
+        return None
+
+    # External / Cloudinary
+    if isinstance(path, str) and path.startswith(("http://", "https://")):
+        return path
+
+    # Static fallback
+    return url_for('static', filename=path)
+
 
 @bp.route('/all-projects', methods=['GET'])
 @login_required
 def all_projects():
+
+    # 🔒 Only superadmin
     if current_user.role != 'superadmin':
-        return abort(403) # ama redirect(url_for('login'))
-        
-    # 1. Ka soo saar dhammaan projects-ka database-ka, adigoo ku kala soocaya taariikhda (ugu dambeeyay ugu horreeya)
+        return abort(403)
+
+    # 📦 Get projects
     projects_cursor = mongo.db.projects.find().sort('created_at', -1)
-    
-    # 2. U beddel document kasta inuu noqdo Project object
-    projects = [Project(proj_data) for proj_data in projects_cursor]
-    
-    # 3. U dir template-ka
-    return render_template('backend/pages/components/projects/all_projects.html', projects=projects)
+
+    projects = []
+
+    for proj_data in projects_cursor:
+
+        # =========================
+        # SAFE DEFAULTS
+        # =========================
+        proj_data.setdefault("thumbnail", "")
+        proj_data.setdefault("gallery", [])
+        proj_data.setdefault("video", {})
+
+        # =========================
+        # NORMALIZE VIDEO
+        # =========================
+        if isinstance(proj_data["video"], str):
+            proj_data["video"] = {
+                "file_url": proj_data["video"],
+                "external_url": ""
+            }
+
+        # =========================
+        # THUMBNAIL CLEANING
+        # =========================
+        proj_data["thumbnail"] = get_image_url(proj_data["thumbnail"])
+
+        # =========================
+        # GALLERY CLEANING
+        # =========================
+        clean_gallery = []
+
+        if isinstance(proj_data["gallery"], list):
+            for img in proj_data["gallery"]:
+                if isinstance(img, str):
+                    url = get_image_url(img)
+                    if url:
+                        clean_gallery.append(url)
+
+        proj_data["gallery"] = clean_gallery
+
+        # =========================
+        # WRAP MODEL
+        # =========================
+        projects.append(Project(proj_data))
+
+    return render_template(
+        'backend/pages/components/projects/all_projects.html',
+        projects=projects
+    )
+
 
 
 #---------------------------------------------------

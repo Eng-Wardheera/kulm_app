@@ -2,10 +2,23 @@
 
 {% block title %}{{ project.title }} - Kulmiye TechW{% endblock %}
 
+{% macro img(url) %}
+    {% if url %}
+        {% if url.startswith('http') %}
+            {{ url }}
+        {% else %}
+            {{ url_for('static', filename=url) }}
+        {% endif %}
+    {% else %}
+        {{ url_for('static', filename='frontend/images/default.png') }}
+    {% endif %}
+{% endmacro %}
+
 {% block content %}
 
+<!-- ================= HERO ================= -->
 <section class="hero-wrap hero-wrap-2"
-         style="background-image: url('{{ url_for('static', filename=project.thumbnail) }}');"
+         style="background-image: url('{{ img(project.thumbnail) }}');"
          data-stellar-background-ratio="0.5">
 
   <div class="overlay"></div>
@@ -13,10 +26,11 @@
   <div class="container">
     <div class="row no-gutters slider-text align-items-end justify-content-center">
       <div class="col-md-9 ftco-animate pb-5 text-center">
+
         <h1 class="mb-0 bread">{{ project.title }}</h1>
 
         <p class="breadcrumbs">
-          <span><a href="{{ url_for('main.index') }}">Home <i class="fa fa-chevron-right"></i></a></span>
+          <span><a href="{{ url_for('main.index') }}">Home</a></span>
           <span>Project Details</span>
         </p>
 
@@ -25,37 +39,41 @@
   </div>
 </section>
 
+<!-- ================= MAIN ================= -->
 <section class="ftco-section">
   <div class="container">
     <div class="row">
 
-      <!-- MAIN CONTENT -->
+      <!-- ================= CONTENT ================= -->
       <div class="col-lg-8 ftco-animate">
 
         <h2 class="mb-3">{{ project.title }}</h2>
 
-        <img src="{{ url_for('static', filename=project.thumbnail) }}"
+        <img src="{{ img(project.thumbnail) }}"
              class="img-fluid w-100 rounded shadow-sm">
 
         <div class="project-description mt-3">
-          {{ project.description|safe }}
+          {{ project.description or '' | safe }}
         </div>
 
         <!-- ================= VIDEO ================= -->
-        {% if project.video_path or project.video_url %}
+        {% if project.video %}
+
         <div class="mt-5">
           <h3 class="border-bottom pb-2">Project Video</h3>
 
-          {% if project.video_path %}
+          {% set video = project.video %}
 
-            <video width="100%" height="500px" controls class="shadow rounded">
-              <source src="{{ url_for('static', filename=project.video_path) }}" type="video/mp4">
+          {% if video.file_url %}
+
+            <video width="100%" height="500" controls class="shadow rounded">
+              <source src="{{ img(video.file_url) }}" type="video/mp4">
             </video>
 
-          {% elif project.video_url %}
+          {% elif video.external_url %}
 
+            {% set url = video.external_url %}
             {% set video_id = None %}
-            {% set url = project.video_url %}
 
             {% if "youtu.be/" in url %}
               {% set video_id = url.split('/')[-1].split('?')[0] %}
@@ -78,39 +96,39 @@
             </div>
 
           {% endif %}
+
         </div>
         {% endif %}
 
         <!-- ================= GALLERY ================= -->
-        <!-- ================= GALLERY ================= -->
         {% if project.gallery %}
+
         <div class="mt-5">
           <h3 class="border-bottom pb-2">Gallery</h3>
 
           <div class="row">
 
-            {% for img in project.gallery %}
+            {% for img_item in project.gallery %}
             <div class="col-md-4 col-sm-6 mb-4 text-center">
 
-              <!-- IMAGE LABEL -->
               <small class="text-muted d-block mb-1">
                 Image {{ loop.index }}
               </small>
 
-              <img src="{{ url_for('static', filename=img) }}"
-                  class="img-fluid rounded shadow-sm"
-                  style="height:200px;object-fit:cover;cursor:pointer;"
-                  onclick="zoomImage(this.src)">
+              <img src="{{ img(img_item) }}"
+                   class="img-fluid rounded shadow-sm"
+                   style="height:200px;object-fit:cover;cursor:pointer;"
+                   onclick="zoomImage(this.src)">
 
             </div>
             {% endfor %}
 
           </div>
         </div>
+
         {% endif %}
 
-
-        <!-- NAVIGATION -->
+        <!-- ================= NAV ================= -->
         <div class="row mt-5">
 
           <div class="col-6">
@@ -135,7 +153,7 @@
 
       </div>
 
-      <!-- SIDEBAR -->
+      <!-- ================= SIDEBAR ================= -->
       <div class="col-lg-4 sidebar ftco-animate">
 
         <div class="p-4 bg-light shadow-sm">
@@ -150,33 +168,57 @@
           <h5 class="mt-3">Links</h5>
 
           <ul class="list-unstyled">
-            {% for k, v in project.social_links.items() %}
-              {% if v %}
-              <li>
-                <a href="{{ v }}" target="_blank">{{ k|capitalize }}</a>
-              </li>
-              {% endif %}
-            {% endfor %}
+            {% if project.social_links %}
+              {% for k, v in project.social_links.items() %}
+                {% if v %}
+                  <li>
+                    <a href="{{ v }}" target="_blank">
+                      {{ k|capitalize }}
+                    </a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
           </ul>
 
         </div>
 
-        
+        <!-- ================= OWNER ================= -->
         {% if owner %}
         <div class="sidebar-box p-4 bg-light shadow-sm mt-4">
-            <h3 class="heading-sidebar mb-3">Project Owner</h3>
-            <div class="d-flex align-items-center">
-                <img src="{{ url_for('static', filename=owner.photo) if owner.photo else url_for('static', filename='images/default-user.png') }}" 
-                     class="rounded-circle mr-3" width="60" height="60" style="object-fit:cover;">
-                <div>
-                    <h5 class="mb-0">{{ owner.fullname }}</h5>
-                    <p class="text-muted mb-0 small">{{ owner.role|capitalize }}</p>
-<a href="https://api.whatsapp.com/send?phone={{ owner.phone }}&text=Hi%20Welcome%20to%20Kulmiye%20Tech">
-    <p class="text-muted mb-0 small">{{ owner.phone }}</p>
-</a>
-                </div>
+
+          <h3 class="heading-sidebar mb-3">Project Owner</h3>
+
+          <div class="d-flex align-items-center">
+
+            <img src="{{ img(owner.photo) }}"
+                 class="rounded-circle mr-3"
+                 width="60" height="60"
+                 style="object-fit:cover;">
+
+            <div>
+              <h5 class="mb-0">{{ owner.fullname }}</h5>
+              <p class="text-muted mb-0 small">
+                {{ owner.role|capitalize }}
+              </p>
+
+              {% if owner.phone %}
+              <a href="https://api.whatsapp.com/send?phone={{ owner.phone }}"
+                 target="_blank">
+                <small>{{ owner.phone }}</small>
+              </a>
+              {% endif %}
             </div>
-            <a href="mailto:{{ owner.email }}" class="btn btn-primary btn-sm mt-3 w-100">Contact Owner</a>
+
+          </div>
+
+          {% if owner.email %}
+          <a href="mailto:{{ owner.email }}"
+             class="btn btn-primary btn-sm mt-3 w-100">
+            Contact Owner
+          </a>
+          {% endif %}
+
         </div>
         {% endif %}
 
@@ -186,8 +228,7 @@
   </div>
 </section>
 
-<!-- ================= IMAGE MODAL ================= -->
-<!-- ================= IMAGE MODAL ================= -->
+<!-- ================= MODAL ================= -->
 <div class="modal fade" id="zoomModal" tabindex="-1">
 
   <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -196,23 +237,17 @@
 
       <div class="modal-header border-0 position-relative">
 
-        <!-- CLOSE BUTTON (X) -->
         <button type="button"
                 class="btn btn-light position-absolute"
                 onclick="closeZoomModal()"
-                style="top:10px; right:10px; font-size:22px; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
-          &times;
+                style="top:10px;right:10px;width:40px;height:40px;border-radius:50%;">
+          ×
         </button>
 
       </div>
 
       <div class="modal-body text-center">
-
-        <img id="modalImage"
-             src=""
-             class="img-fluid rounded"
-             style="max-height:80vh;">
-
+        <img id="modalImage" src="" class="img-fluid rounded" style="max-height:80vh;">
       </div>
 
     </div>
@@ -220,48 +255,24 @@
   </div>
 </div>
 
-
 <script>
 
-let zoomModalInstance = null;
+let modalInstance = null;
 
-/* OPEN MODAL */
 function zoomImage(src) {
-    const modalEl = document.getElementById('zoomModal');
-
     document.getElementById('modalImage').src = src;
-
-    zoomModalInstance = new bootstrap.Modal(modalEl, {
-        backdrop: true,
-        keyboard: true,
-        focus: true
-    });
-
-    zoomModalInstance.show();
+    modalInstance = new bootstrap.Modal(document.getElementById('zoomModal'));
+    modalInstance.show();
 }
 
-/* MANUAL CLOSE FUNCTION */
 function closeZoomModal() {
-    const modalEl = document.getElementById('zoomModal');
-
-    if (zoomModalInstance) {
-        zoomModalInstance.hide();
-    } else {
-        bootstrap.Modal.getInstance(modalEl)?.hide();
-    }
-
-    clearZoomImage();
-}
-
-/* CLEAR IMAGE */
-function clearZoomImage() {
+    modalInstance?.hide();
     document.getElementById('modalImage').src = '';
 }
 
-/* CLEAN WHEN FULLY CLOSED */
 document.getElementById('zoomModal')
 .addEventListener('hidden.bs.modal', function () {
-    clearZoomImage();
+    document.getElementById('modalImage').src = '';
 });
 
 </script>
